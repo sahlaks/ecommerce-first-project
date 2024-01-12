@@ -1,0 +1,27 @@
+<section class="vh-100" style="background-color: #FBD2E0">
+<h2 style="text-align:center; padding-top:2.5em;font-weight:bolder">Reflections</h2>
+
+  <div class="container w-25 border py-2" id="container" style="background-color: white;border-radius:1rem; ">
+    <h2 class="font-weight-bold">Password assistance</h2>
+    <p>Enter the email address associated with your account.</p>
+     {{#if Error}} <span class="text-danger">{{Error}}</span> {{/if}}
+    <form action="/forgotpwd" method="post">
+    <div class="mb-3">
+      <div class="fontstyle">
+        <label for="exampleInputEmail1">Email address</label><br>
+        <div id="emailError" class="error-message"></div>
+        
+        <input
+          type="email"
+          class="form-control"
+          name="email"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+        />
+      </div>
+        <br>
+        <button type="submit" class="btn btn-warning">Continue</button>
+</div>
+    </form>
+  </div>
+</section>

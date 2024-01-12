@@ -1,0 +1,68 @@
+    <style>
+        
+        .textdecor{
+            text-decoration: none; 
+            color:rgb(31, 167, 170);
+            }
+        a:hover{
+            color:rgb(161, 67, 67);
+        }
+    </style>
+<section class="vh-100" style="background-color: #FBD2E0">
+  <h2 style="text-align:center; padding-top:2.5em;font-weight:bolder">Reflections</h2>
+
+  <div class="container w-25 border py-4" id="container" style="background-color: white;border-radius:1rem;">
+    <h2 class="font-weight-bold">Create Account</h2>
+    {{#if Error}} <span class="text-danger">{{Error}}</span>{{/if}}
+    <form action="/signup" method="post">
+        <div class="fontstyle">
+        <div class="mb-3">
+        <label for="formGroupExampleInput" class="form-label">Your name</label><br>
+        {{#if err.username.path}} <span class="text-danger">{{err.username.msg}}</span> {{/if}}
+        <input type="text" class="form-control" name="username" id="formGroupExampleInput">
+        </div>
+        <div class="mb-3">
+        <label for="formGroupExampleInput" class="form-label">Mobile number</label><br>
+        {{#if err.mobilenumber.path}} <span class="text-danger">{{err.mobilenumber.msg}}</span> {{/if}}
+        <input type="text" class="form-control" name="mobilenumber" id="formGroupExampleInput">
+    </div>
+      <div class="fontstyle">
+        <label for="exampleInputEmail1">Email address</label><br>
+         {{#if err.email.path}} <span class="text-danger">{{err.email.msg}}</span> {{/if}}
+        <input
+          type="email"
+          class="form-control"
+          name="email"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+        />
+      </div>
+      <div class="fontstyle">
+        <label for="exampleInputPassword1">Password</label><br>
+        {{#if err.password.path}} <span class="text-danger">{{err.password.msg}}</span> {{/if}}
+        <input
+          type="password"
+          class="form-control"
+          name="password"
+          id="exampleInputPassword1"
+        />
+      </div>
+      <div class="fontstyle">
+        <label for="exampleInputPassword1">Confirm password</label><br>
+        {{#if err.confirmpassword.path}} <span class="text-danger">{{err.confirmpassword.msg}}</span> {{/if}}
+        <input
+          type="password"
+          class="form-control"
+          name="confirmpassword"
+          id="exampleInputPassword1"
+        />
+      </div><br>
+      <button type="submit" class="btn btn-warning">Verify Email</button>
+
+      <p>Already have an account?
+        <a
+          href="/login" class = "textdecor">Sign in</a></p>
+    </form>
+  </div>
+</div>
+</section>

@@ -1,0 +1,31 @@
+<section class="vh-100" style="background-color: #FBD2E0">
+<h2 style="text-align:center; padding-top:2.5em;font-weight:bolder">Reflections</h2>
+
+    <div class="container w-25 border py-2" id="container" style="background-color: white;border-radius:1rem;">
+        <h2 class="font-weight-bold">Reset Password</h2>
+        <p>Please enter a new password</p>
+        <form action="/resetpwd" method="post">
+        <div class="fontstyle">
+        <label for="exampleInputPassword1">Password</label><br>
+        {{#if err.password.path}} <span class="text-danger">{{err.password.msg}}</span> {{/if}}
+        <input
+          type="password"
+          class="form-control"
+          name="password"
+          id="exampleInputPassword1"
+        />
+      </div>
+      <div class="fontstyle">
+        <label for="exampleInputPassword1">Confirm password</label><br>
+        {{#if err.confirmpassword.path}} <span class="text-danger">{{err.confirmpassword.msg}}</span> {{/if}}
+        <input
+          type="password"
+          class="form-control"
+          name="confirmpassword"
+          id="exampleInputPassword1"
+        />
+    </div><br>
+    <button type="submit" class="btn btn-warning">Reset Password</button>
+    </form>
+    </div>
+</section>

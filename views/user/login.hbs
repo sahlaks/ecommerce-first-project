@@ -1,0 +1,57 @@
+<style>
+    .error-message{
+        color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .decor{
+        text-decoration: none;
+        color:rgb(31, 167, 170);
+    }
+    a:hover{
+        color:brown;
+    }
+</style>
+<section class="vh-100" style="background-color: #FBD2E0">
+<h2 style="text-align:center; padding-top:2.5em;font-weight:bolder">Reflections</h2>
+
+  <div class="container w-25 border py-5" id="container" style=" background-color:white;border-radius:1rem">
+    <h2 class="font-weight-bold">Sign in</h2>
+    {{#if Error}} <span class="text-danger">{{Error}}</span> {{/if}}
+    <form action="/login" method="post">
+    <div class="mb-3">
+      <div class="fontstyle">
+        <label for="exampleInputEmail1">Email address</label><br>
+        <div id="emailError" class="error-message"></div>
+        <!-- {{#if err}} <span class="text-danger">{{err}}</span> {{/if}}-->
+        <input
+          type="email"
+          class="form-control"
+          name="email"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+        />
+      </div>
+       
+      <div class="fontstyle">
+        <label for="exampleInputPassword1">Password</label><br>
+        <input
+          type="password"
+          class="form-control"
+          name="password"
+          id="exampleInputPassword1"
+        />
+      </div>
+      </div>
+    
+       <button type="submit" class="btn btn-warning">Sign In</button><br><br>
+       <p> 
+        <a href="/forgotpwd" class="decor">Forgot Password?</a>
+       </p>
+        <p>New to Reflections? 
+            <a href="/signup" class="decor">Create your account</a></p>
+      </form>
+    </div>
+    </section>
+    
+      

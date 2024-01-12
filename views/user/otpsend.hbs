@@ -1,0 +1,47 @@
+<section class="vh-100" style="background-color: #FBD2E0">
+<h2 style="text-align:center; padding-top:2.5em;font-weight:bolder">Reflections</h2>
+
+  <div class="container w-25 border py-2" id="container" style="background-color: white;border-radius:1rem;">
+    <h2 class="font-weight-bold">Verify your email</h2>
+    <form action="/otpsend" method="post">
+        <div class="mb-3">
+        <div class="fontstyle">
+            <p id="otp">
+            </p>
+        <label for="otp">Enter the OTP</label>
+        <input type="password"
+          class="form-control"
+          name="otp"><br>
+        <button type="submit"  class="btn btn-warning" id="submitotp">Submit OTP</button>
+        </div>
+        </div>
+    </form>
+        <form action="/sendOtp" method="post">
+        <button type="submit"  class="btn btn-warning" id="resendotp" style="display: none;">Resend OTP</button>
+    </form>
+</div>
+</section>
+
+
+
+
+
+
+ <script>
+    var timeLeft = 30;
+    function updateTimerandotp(){
+        document.getElementById('otp').innerText = `${timeLeft}`
+        timeLeft--;
+        if(timeLeft >= 0){
+        var cleartimer = setTimeout(updateTimerandotp,1000);
+        }
+        else{
+            //clearTimeout(cleartimer);
+            document.getElementById('otp').innerText = 'Time expired';
+            document.getElementById('resendotp').style.display = 'block';
+            document.getElementById('submitotp').style.display = 'none';
+        }
+    }
+    updateTimerandotp();
+
+</script>
