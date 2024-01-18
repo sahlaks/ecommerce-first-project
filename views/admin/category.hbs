@@ -100,7 +100,7 @@ h1 {
             <th scope="col">#</th>
             <th scope="col">Category Name</th>
             <th scope="col">Image</th>
-            <th scope="col">Description</th>
+            
             <th scope="col">Added At</th>
             <th scope="col">Edit</th>
             <th scope="col">Delete</th>
@@ -113,7 +113,7 @@ h1 {
                 <td>{{@index}}</td>
                 <td>{{this.category}}</td>
                  <td><img src="/images/{{this.image}}"  alt="Category image" style="max-width: 50px;max-height:50px"></td>
-                <td>{{this.description}}</td>
+                
                 <td>{{this.addedAt}}</td>
                 <td><a href="/admin/editcategory/{{this._id}}" class="btn btn-info">Edit</a></td>
                 <td><a href="/admin/cdelete/{{this._id}}" class="btn btn-danger" onclick="return confirm('Are you sure want to delete')">Delete</a></td>

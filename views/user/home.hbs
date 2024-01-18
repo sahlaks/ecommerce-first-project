@@ -1,1 +1,245 @@
-<h1>Welcome Home</h1>
+
+<body>
+    <!--? Preloader Start -->
+    {{!-- <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="assets/img/logo/logo.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div> --}}
+    <!-- Preloader Start -->
+    
+    <main>
+        <!--? slider Area Start -->
+        <div class="slider-area ">
+            <div class="slider-active">
+                <!-- Single Slider -->
+                <div class="single-slider slider-height d-flex align-items-center slide-bg">
+                    <div class="container">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8">
+                                <div class="hero__caption">
+                                    <h1 data-animation="fadeInLeft" data-delay=".4s" data-duration="2000ms">'Elevate your style, one watch and bag at a time'</h1>
+                                    <p data-animation="fadeInLeft" data-delay=".7s" data-duration="2000ms">Timeless accessories for the modern youSelect Your New Perfect Style..</p>
+                                    <!-- Hero-btn -->
+                                    <div class="hero__btn" data-animation="fadeInLeft" data-delay=".8s" data-duration="2000ms">
+                                        <a href="/products" class="btn hero-btn">Shop Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 d-none d-sm-block">
+                                <div class="hero__img" data-animation="bounceIn" data-delay=".4s">
+                                    <img src="assets/img/hero/x.png" alt="" class=" heartbeat">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Single Slider -->
+                <div class="single-slider slider-height d-flex align-items-center slide-bg">
+                    <div class="container">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8">
+                                <div class="hero__caption">
+                                    <h1 data-animation="fadeInLeft" data-delay=".4s" data-duration="2000ms">Select Your New Perfect Style</h1>
+                                    <p data-animation="fadeInLeft" data-delay=".7s" data-duration="2000ms"> Your accessories tell a story of your unique style and the precious moments you cherish</p>
+                                    <!-- Hero-btn -->
+                                    <div class="hero__btn" data-animation="fadeInLeft" data-delay=".8s" data-duration="2000ms">
+                                        <a href="/products" class="btn hero-btn">Shop Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 d-none d-sm-block">
+                                <div class="hero__img" data-animation="bounceIn" data-delay=".4s">
+                                    <img src="assets/img/hero/z.png
+                                    " alt="" class=" heartbeat">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- slider Area End-->
+
+
+        <!--  New Product Start -->
+        <section class="new-product-area section-padding30">
+            <div class="container">
+                <!-- Section tittle -->
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section-tittle mb-70">
+                            <h2>New Arrivals</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {{#each newarrival}}
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="single-new-pro mb-30 text-center">
+                            <div class="product-img" style="max-width: 100%;">
+                                 <a href="/products"><img src="/images/{{this.image}}" alt="product image" ></a>
+                            </div>
+                            <div class="product-caption" style="font-size: 2rem;">
+                                <h3><a href="/products">{{this.productname}}</a></h3>
+                                <span style="color: #0B1C39;"> {{this.price}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                    
+                </div> 
+            </div>
+        </section>
+        <!--  New Product End -->
+
+
+        <!--? Gallery Area Start -->
+        <div class="gallery-area">
+            <div class="container-fluid p-0 fix">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-4 col-md-6 col-sm-6">
+                        <div class="single-gallery mb-30">
+                            <div class="gallery-img big-img" style="background-image: url(assets/img/gallery/bags.webp);"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                        <div class="single-gallery mb-30">
+                            <div class="gallery-img big-img" style="background-image: url(assets/img/gallery/as.jpg);"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-12">
+                        <div class="row">
+                            <div class="col-xl-12 col-lg-12 col-md-6 col-sm-6">
+                                <div class="single-gallery mb-30">
+                                    <div class="gallery-img small-img" style="background-image: url(assets/img/gallery/black.jpg);"></div>
+                                </div>
+                            </div>
+                            <div class="col-xl-12 col-lg-12  col-md-6 col-sm-6">
+                                <div class="single-gallery mb-30">
+                                    <div class="gallery-img small-img" style="background-image: url(assets/img/gallery/rosegold.jpg);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- Gallery Area End -->
+
+        <!-- Popular Items Start -->
+        <div class="popular-items section-padding30">
+            <div class="container">
+                <!-- Section tittle -->
+                <div class="row justify-content-center">
+                    <div class="col-xl-7 col-lg-8 col-md-10">
+                        <div class="section-tittle mb-70 text-center">
+                            <h2>Popular Items</h2>
+                            <p>Discover the essence of popularity with our curated collection of must-have products. From statement bags that redefine fashion to timeless watches that embody elegance, our selection is a celebration of style and sophistication</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {{#each products}}
+
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                        <div class="single-popular-items mb-60 text-center" style="max-width: 70%;">
+                            <div class="popular-img">
+                                <a href="/productdetails/{{this._id}}"><img src="/images/{{this.image}}" alt="product image"></a>
+                                <div class="img-cap">
+                                    <a href="/addcart/{{this._id}}"><span>Add to cart</span></a>
+                                </div>
+                                <div class="favorit-items">
+                                    <a href="/wishlist"><span class="flaticon-heart"></span></a>
+                                </div>
+                            </div>
+                            <div class="popular-caption">
+                                <h3><a href="/productdetails/{{this._id}}">{{this.productname}}</a></h3>
+                                <span>{{this.price}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                    
+                </div>
+                <!-- Button -->
+                <div class="row justify-content-center">
+                    <div class="room-btn pt-70">
+                        <a href="/products" class="btn view-btn1">View More Products</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!--? Watch Choice  Start-->
+        <div class="watch-area section-padding30">
+            <div class="container">
+                <div class="row align-items-center justify-content-between padding-130">
+                    <div class="col-lg-5 col-md-6">
+                        <div class="watch-details mb-40">
+                            <h2>Bag of Choice</h2>
+                            <p>Choose from a range of colors, textures, and designs to find the perfect match for your personality and workplace aesthetic.</p>
+                            <a href="/products" class="btn">Show More</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-10">
+                        <div class="choice-watch-img mb-40">
+                            <img src="assets/img/gallery/SAN9906.webp" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="row align-items-center justify-content-between">
+                    <div class="col-lg-6 col-md-6 col-sm-10">
+                        <div class="choice-watch-img mb-40">
+                            <img src="assets/img/gallery/green2.jpg" alt="">
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6">
+                        <div class="watch-details mb-40">
+                            <h2>Watch of Choice</h2>
+                            <p> Discover precision and elegance with our handpicked selection of watches. From classic designs to modern innovations, our timepieces cater to every style and occasion.</p>
+                            <a href="/products" class="btn">Show More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bag Choice  End-->
+
+        <!--? Shop Method Start-->
+        <div class="shop-method-area">
+            <div class="container">
+                <div class="method-wrapper">
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="single-method mb-40">
+                                <i class="ti-package"></i>
+                                <h6>Free Shipping Method</h6>
+                                <p style="color:white;">we believe in making your shopping experience seamless and enjoyable. 
+                                    That's why we're excited to offer you free shipping on every order.</p>
+                            </div>
+                        </div>
+                       
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="single-method mb-40">
+                                <i class="ti-reload"></i>
+                                <h6>Secure Payment System</h6>
+                                <p style="color: white;">your security is our top priority. We utilize industry-leading encryption technology, 
+                                    providing you with a secure and seamless shopping experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Shop Method End-->
+    </main>
+  
+   
+

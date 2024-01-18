@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
-const User = require("../models/usermodel")
+const User = require("../models/usermodel");
+const Product = require('../models/productmodel');
 
 
 /*...........................................setup nodemailer..................................................*/
@@ -26,10 +27,14 @@ const userIn = async (req,res) => {
         if (user) {
           bcrypt.compare(req.body.password, user.password, (err,result)=>{
             if(result){ 
-                
+                if(user.isblocked){
+                    res.render('user/login',{Error: 'Sorry.. You cannot access the page!'})
+                }else{
                 req.session.email = req.body.email;
                 req.session.username = user.username;
+                req.session.uid = user._id;
                 res.redirect("home")
+                }
             }else{
               res.render('user/login',{Error: 'Incorrect password.. Please try again'})
             }
@@ -46,8 +51,10 @@ const userIn = async (req,res) => {
 
 
 /*...............................................home page.....................................................................*/
-const homeRoute = (req,res) => {
-    res.render('user/home')
+const homeRoute = async (req,res) => {
+    const products = await Product.find().limit(6).lean()
+    const newarrival = await Product.find().sort({_id:-1}).limit(3).lean()
+    res.render('user/home',{user:true,products,newarrival})
 }
 
 
@@ -86,7 +93,7 @@ const sendOtp = (req,res) => {
         req.session.otp = OTP;
         console.log(req.session.otp)
 
-        var emails = "sahlaanasks@gmail.com"
+        var emails = req.session.email
         sendMail(emails,`${OTP}`);
 
            function sendMail(emails ,otp){
@@ -145,6 +152,7 @@ const resetPwd = (req,res) =>{
 const reSet = async (req,res) => {
     const hashPassword = await bcrypt.hash(req.body.password,10)
     req.body.password = hashPassword;
+    const val = await User.updateOne({email:req.session.email},{$set: {password:req.body.password}})
     
     res.redirect('home')
 }
@@ -172,6 +180,22 @@ const verifyMail =async (req,res) => {
         }
 }
 
+/*...................................................contact controller................................................................*/
+const contactController = async(req,res)=>{
+    res.render('user/contact',{user:true})
+}
+
+const aboutController = async(req,res) => {
+    res.render('user/about',{user:true})
+}
+
+/*........................................................signout...........................................*/
+const signout = async (req,res) => {
+    req.session.destroy();
+        res.redirect('/login')
+}
+
+
 
 module.exports = {userLogin,
                 userIn,
@@ -186,5 +210,8 @@ module.exports = {userLogin,
                 verifyMail,
                 failOtp,
                 resetPwd,
-                reSet
+                reSet,
+                contactController,
+                aboutController,
+                signout
             }

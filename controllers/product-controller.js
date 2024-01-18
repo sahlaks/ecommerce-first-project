@@ -1,5 +1,6 @@
 const Product = require("../models/productmodel")
 const Category = require("../models/categorymodel")
+const Cart = require("../models/cartmodel")
 
 
 /*..............................................add product......................................................*/
@@ -52,6 +53,8 @@ const updatePro = async (req,res) => {
     req.session.catId = catId;
     try{
         const data = await Product.findById({_id:catId}).lean()
+        req.session.details = data
+        //console.log(req.session.details)
         res.render('admin/editproduct',{catId,data})
      
     }
@@ -166,6 +169,8 @@ const editCat = async (req,res) => {
     req.session.catId = catId;
     try{
         const data = await Category.findById({_id:catId}).lean()
+        req.session.category = data
+        //console.log(req.session.category)
         res.render('admin/editcategory',{catId,data})
      
     }
@@ -210,6 +215,67 @@ const updateimage = async (req,res) => {
 }
 
 
+/*..............................................displayproducts.................................*/
+const products = async (req,res) => {
+    const userId = req.session.uid;
+    const products = await Product.find().lean()
+    const category = await Category.find().lean()
+    const user = await Cart.findById({_id:userId})
+    var count = 0;
+    if(user){
+         count = user.products.length;
+        console.log(count)
+        // if(!count){
+        //     count = 0;
+        // }
+    }
+        res.render('products/products',{user:true,products,category,count})
+}
+
+const productDetails = async (req,res) => {
+    const pId = req.params.id;
+    //console.log(pId)
+    req.session.pid = pId;
+    const details = await Product.findById({_id:pId}).lean()
+    //console.log(details)
+    res.render('products/product_details',{user:true,details})
+}
+
+
+/*..............................................................add to cart......................................*/
+const addCart = async (req,res) => {
+    try{
+
+        //console.log(req.session.uid)
+       // console.log(req.params.pid)
+        
+        const userId = req.session.uid;
+        const pId = req.params.pid;
+        const user = await Cart.findOne({userId})
+        if(user){
+            const existpro = user.products.find(p => p.proId == pId)
+            if(existpro){
+                existpro.quantity +=1;
+            }
+            else{
+                user.products.push({proId:pId,quantity:1})
+            }
+            await user.save();
+        }else{
+            const cartData = {userId,
+                            products:[{proId:pId,quantity:1}]
+                             }
+                
+            const newCart = await Cart.create(cartData);
+            }
+        res.redirect('/products')
+    }catch(error){
+        throw new Error(error.message)
+    }
+}
+
+
+
 
 module.exports = {addPro,
                 addProduct,
@@ -223,5 +289,8 @@ module.exports = {addPro,
                 updatePro,
                 editProduct,
                 editimage,
-                editimages
+                editimages,
+                products,
+                productDetails,
+                addCart
             }

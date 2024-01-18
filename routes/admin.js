@@ -22,7 +22,7 @@ app.get('/deleteproduct/:id',verifyAdmin,deleteProduct)
 app.get('/editproduct/:id',verifyAdmin,updatePro)
 app.post('/editproduct/:id',verifyAdmin,productRules,productValidation,editProduct)
 app.post('/editimage/:proId',verifyAdmin,upload.single('image'),editimage)
-app.post('/editimages/:proId',verifyAdmin,upload.array('images',4),editimages)
+app.post('/editimages/:proId',verifyAdmin,upload.array('images',6),editimages)
 
 
 /*..........................................category.................................................*/
@@ -32,7 +32,7 @@ app.post('/addcategory',verifyAdmin,upload.single('image'),categoryRules,categVa
 app.get('/cdelete/:id',verifyAdmin,deleteCategory)
 app.get('/editcategory/:id',verifyAdmin,editCat)
 app.post('/editcategory/:id',verifyAdmin,categoryRules,categoryValidation,editcategory)
-app.post('/updateimage/:catId',upload.single('image'),updateimage)
+app.post('/updateimage/:catId',verifyAdmin,upload.single('image'),updateimage)
 
 
 /*...........................................orders..............................................*/

@@ -62,7 +62,9 @@ h1 {
         display:none;
     }
 }
-
+.form-control{
+    width:50%;
+}
 </style>
 
 
@@ -94,7 +96,7 @@ h1 {
         
          <h2 class="font-weight-bold">Add Category</h2>
          {{#if Error}} <span class="text-danger">{{Error}}</span> {{/if}}
-         <div class="container">
+         <div class="">
         
         <form action="/admin/addcategory" method="post" enctype="multipart/form-data">
 

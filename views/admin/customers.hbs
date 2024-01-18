@@ -117,11 +117,9 @@ h1 {
                 <td>{{this.email}}</td>
                 <td>{{this.mobilenumber}}</td>
                 {{#if this.isblocked}}
-                   <!-- <td><button class="btn btn-success button">Blocked</button></td>-->
                     <td><a href="/admin/isblocked/{{this._id}}" class="btn btn-danger ml-auto">Blocked</a></td>
         
                 {{else}}
-                  <!--  <td><button class="btn btn-success button">Active</button></td>-->
                    <td> <a href="/admin/isblocked/{{this._id}}" class="btn btn-success ml-auto">Active</a></td>
         
                 {{/if}}

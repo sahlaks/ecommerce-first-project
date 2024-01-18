@@ -124,10 +124,13 @@ const categValidation =(req,res,next)=>{
     }
 }
 const categoryValidation =(req,res,next)=>{
+    // console.log('inside validation')
+    // console.log(req.session.category)
+    const data = req.session.category
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
-        res.render("admin/editcategory",{err:error.mapped()})
+        res.render("admin/editcategory",{err:error.mapped(),data})
     }
     else{
         next()
@@ -137,29 +140,34 @@ const categoryValidation =(req,res,next)=>{
 
 /*.........................................product validation..............................................*/
 const productRules = [ 
-    check('productname').not().isEmpty().withMessage("Product is required"),
-    check('description').not().isEmpty().withMessage("Description is required"),
-    check('price').not().isEmpty().withMessage("Price is required")
-    .isLength({min:3,max:6}).withMessage("Price should be in 3 digits to 6 digits").
-    custom((value,{req})=> {
-        if(value<=-1){
+    check('productname')
+    .not().isEmpty().withMessage("Product is required"),
+    check('description')
+    .not().isEmpty().withMessage("Description is required"),
+    check('price')
+    .not().isEmpty().withMessage("Price is required")
+    .isLength({min:3,max:7}).withMessage("Price should be in 3 digits to 7 digits").
+    custom((value , {req})=> {
+        const price = parseFloat(value);
+        const discount = parseFloat(req.body.discount);
+
+        if(value <= -1){
             throw new Error('Price should not be negative')
         }
-        else if(value < req.body.discount){
+       
+        if(price < discount){
             throw new Error('Price should higher than discount')
         }
         return true;
     }),
-    check('quantity').not().isEmpty().withMessage('Quantity is required')
-    .custom((value,{req}) => {
-        if(value<=-1){
-            throw new Error('Quantity should not be negative')
-        }
-        return true;
-    }),
-    check('status').not().isEmpty().withMessage("Status is required")
+    check('quantity')
+    .not().isEmpty().withMessage('Quantity is required')
+    .custom(value => value >= 0).withMessage('Quantity should not be negative'),
+    check('status')
+    .not().isEmpty().withMessage("Status is required")
     .isString().withMessage("Invalid value"),
-    check('discount').custom((value,{req})=>{
+    check('discount')
+    .custom((value,{req})=>{
         if(value <=-1){
             throw new Error('Discount should not be negative')
         }
@@ -168,6 +176,7 @@ const productRules = [
 ]
 
 const proValidation = (req,res,next)=>{
+    
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
@@ -179,10 +188,13 @@ const proValidation = (req,res,next)=>{
 }
 /*.................................edit validation.............................*/
 const productValidation = (req,res,next)=>{
+    //console.log('in validation')
+    //console.log(req.session.details)
+    const data = req.session.details
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
-        res.render("admin/editproduct",{err:error.mapped()})
+        res.render("admin/editproduct",{err:error.mapped(),data})
     }
     else{
         next()
