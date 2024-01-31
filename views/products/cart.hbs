@@ -40,9 +40,9 @@ body {
 	transform: scale(1.01);
 }
 .box img {
-	width: 300px;
-	height: 200px;
-	object-fit: cover;
+	max-width: 100%;
+	object-fit: contain;
+
 }
 .content {
 	padding: 20px;
@@ -126,8 +126,7 @@ body {
 		height: 150px;
 	}
 	.box img {
-		height: 150px;
-		width: 200px;
+		height: auto;
 	}
 }
 @media screen and (max-width: 900px) {
@@ -144,61 +143,75 @@ body {
 		max-width: 95%;
 	}
 }
+
+.btn{
+	background:#ffc107
+}
 </style>
 
-
-<!DOCTYPE html>
-<html lang="en">
-<!--divinectorweb.com-->
-<head>
-    <meta charset="UTF-8">
-    <title>Responsive Shopping Cart design</title>
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-	<link href="style.css" rel="stylesheet">
-</head>
 <body>
     <div class="wrapper">
 		<h1>Shopping Cart</h1>
 		<div class="project">
 			<div class="shop">
+
+				 {{#each cartData}}
 				<div class="box">
-					<img src="1.jpg">
+					<img src="/images/{{this.product.image}}" style="height:100px;width:100px">
 					<div class="content">
-						<h3>Women Lipsticks</h3>
-						<h4>Price: $40</h4>
-						<p class="unit">Quantity: <input name="" value="2"></p>
-						<p class="btn-area"><i aria-hidden="true" class="fa fa-trash"></i> <span class="btn2">Remove</span></p>
+						<h3>{{this.product.productname}}</h3>
+						<h4>Price: {{this.product.price}}</h4>
+
+						
+        				<div class="container" style="display: flex;"> 
+						<p style="color: black;" class="unit" >Quantity: </p>
+						<a href="/cartChangeQuantity?id={{this.product._id}}&&count=-1" class="btn" >-</a>
+						<input style="width: 50px; text-align:center; font-size:2rem;" name="" class="" id="{{this.product._id}}" value="{{quantity}}" >
+						<a href="/cartChangeQuantity?id={{this.product._id}}&&count=1" class="btn" >+</a> </div>
+						<p class="btn-area"><a aria-hidden="true" class="fa fa-trash" href="/deleteCart/{{this.product._id}}" onclick="return confirm('Are you sure want to delete')">Remove</a></p>
 					</div>
 				</div>
-				<div class="box">
-					<img src="2.jpg">
-					<div class="content">
-						<h3>Man's Watches</h3>
-						<h4>Price: $40</h4>
-						<p class="unit">Quantity: <input name="" value="1"></p>
-						<p class="btn-area"><i aria-hidden="true" class="fa fa-trash"></i> <span class="btn2">Remove</span></p>
-					</div>
-				</div>
-				<div class="box">
-					<img src="3.jpg">
-					<div class="content">
-						<h3>Samsung Mobile</h3>
-						<h4>Price: $250</h4>
-						<p class="unit">Quantity: <input name="" value="0"></p>
-						<p class="btn-area"><i aria-hidden="true" class="fa fa-trash"></i> <span class="btn2">Remove</span></p>
-					</div>
-				</div>
+				{{/each}}
+				
 			</div>
+			
 			<div class="right-bar">
-				<p><span>Subtotal</span> <span>$120</span></p>
+				<p><span>Subtotal</span> <span>{{subtotal}}</span></p>
 				<hr>
-				<p><span>Tax (5%)</span> <span>$6</span></p>
+				<p><span>Discount</span> <span>{{discount}}</span></p>
 				<hr>
-				<p><span>Shipping</span> <span>$15</span></p>
+				<p><span>Shipping</span> <span>free</span></p>
 				<hr>
-				<p><span>Total</span> <span>$141</span></p><a href="#"><i class="fa fa-shopping-cart"></i>Checkout</a>
+				<p><span>Total</span> <span>{{total}}</span></p><a href="/checkout"><i class="fa fa-shopping-cart"></i>Checkout</a>
 			</div>
+			
 		</div>
 	</div>
+
+
+
+{{!-- <script>
+
+
+function increment(id,count) {
+	var quantity = document.getElementById(id).value;
+	if(quantity==1&&count==-1){
+
+	}
+	else{
+
+	console.log(id,count,quantity)
+	
+   document.getElementById(id).value=parseInt(quantity)+parseInt(count)
+	}
+
+	
+
+
+}
+
+
+</script> --}}
+
+
 </body>
-</html>

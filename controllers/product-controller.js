@@ -1,11 +1,13 @@
 const Product = require("../models/productmodel")
 const Category = require("../models/categorymodel")
 const Cart = require("../models/cartmodel")
+const Wishlist = require("../models/wishlistmodel")
 
 
 /*..............................................add product......................................................*/
 const addPro = async (req,res) => {
     try{
+        
         const category = await Category.find().lean()
         res.render('admin/addproduct',{category})
     }
@@ -15,6 +17,7 @@ const addPro = async (req,res) => {
 }
 
 const addProduct = async (req,res) => {
+
     console.log(req.body)
     const filepath = req.file.filename;
     
@@ -63,7 +66,7 @@ const updatePro = async (req,res) => {
     }
 
 }
-
+                                    /*.....edit product.....*/
 const editProduct = async (req,res) => {
     const proId = req.params.id;
     req.session.proId = proId;
@@ -84,7 +87,7 @@ const editProduct = async (req,res) => {
      }
 }
 
-    
+                                    /*....edit image....*/
 const editimage = async (req,res) => {
     const proId = req.params.proId;
     try{
@@ -98,6 +101,20 @@ const editimage = async (req,res) => {
     }
 }
 
+                                    /*.....delete image.....*/
+const deleteImage = async (req,res) => {
+    try{
+        const proId = req.params.id;
+        const product = await Product.findOneAndUpdate({_id:proId},{$unset: {image:1}})
+        const data = await Product.findOne({_id:proId}).lean()
+        console.log(data)
+       res.render('admin/editproduct',{data})
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
+
+                                        /*......edit images......*/
 const editimages = async (req,res) => {
     const proId = req.params.proId;
     try{
@@ -111,7 +128,22 @@ const editimages = async (req,res) => {
     }
 }
 
+                                        /*.......delete images.......*/
+const deleteImages = async (req,res) => {
+    try{
+        const name = req.query.name;
+        const product = await Product.findOne({subImage: {$in:[name] }})
+        //console.log(product)
+        //console.log(name)
+        await Product.findOneAndUpdate({_id:product._id},
+                                        {$pull: {subImage: name}})
+        const data = await Product.findOne({_id:product._id}).lean()
+        res.render('admin/editproduct',{data})
 
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
 
 
 
@@ -200,7 +232,7 @@ const editcategory = async (req,res) => {
 
 }
 
-/*........................................image............................................*/
+/*..............................................image............................................*/
 const updateimage = async (req,res) => {
     const catId = req.params.catId;
     try{
@@ -217,61 +249,78 @@ const updateimage = async (req,res) => {
 
 /*..............................................displayproducts.................................*/
 const products = async (req,res) => {
-    const userId = req.session.uid;
-    const products = await Product.find().lean()
-    const category = await Category.find().lean()
-    const user = await Cart.findById({_id:userId})
-    var count = 0;
-    if(user){
-         count = user.products.length;
-        console.log(count)
-        // if(!count){
-        //     count = 0;
-        // }
-    }
-        res.render('products/products',{user:true,products,category,count})
-}
-
-const productDetails = async (req,res) => {
-    const pId = req.params.id;
-    //console.log(pId)
-    req.session.pid = pId;
-    const details = await Product.findById({_id:pId}).lean()
-    //console.log(details)
-    res.render('products/product_details',{user:true,details})
-}
-
-
-/*..............................................................add to cart......................................*/
-const addCart = async (req,res) => {
     try{
 
-        //console.log(req.session.uid)
-       // console.log(req.params.pid)
+        var search = '';
+        if(req.query.search){
+                search = req.query.search;
+        }
+        var page = 1;
+        if(req.query.page){
+                page = req.query.page;
+        }
+
         
-        const userId = req.session.uid;
-        const pId = req.params.pid;
-        const user = await Cart.findOne({userId})
-        if(user){
-            const existpro = user.products.find(p => p.proId == pId)
-            if(existpro){
-                existpro.quantity +=1;
-            }
-            else{
-                user.products.push({proId:pId,quantity:1})
-            }
-            await user.save();
-        }else{
-            const cartData = {userId,
-                            products:[{proId:pId,quantity:1}]
-                             }
-                
-            const newCart = await Cart.create(cartData);
-            }
-        res.redirect('/products')
+        const limit = 6;
+        const products = await Product.find({
+            list:true,
+            $or:[
+                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                {category : {$regex: '.*'+search+'.*',$options:'i'} },
+            ]
+        })
+        .limit( limit * 1 )
+        .skip( (page - 1) * limit )
+        .lean()
+
+        const count = await Product.find({
+            list:true,
+            $or:[
+                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                {category : {$regex: '.*'+search+'.*',$options:'i'} },
+            ]
+        }).countDocuments();
+
+        const totalPages = Math.ceil(count/limit);
+        const currentPage = page;
+
+        const pages = [];
+        for (let j = 1; j <= totalPages; j++) {
+            pages.push({
+                        pageNumber: j,
+                        isCurrent: j == currentPage,
+                        });
+}
+
+        // console.log('search',products)
+        // const products = await Product.find().lean()
+        const category = await Category.find().lean()
+        res.render('products/products',{user:true,products,
+                                        category,
+                                        totalPages,
+                                        currentPage,
+                                        pages,
+                                    });
     }catch(error){
         throw new Error(error.message)
     }
+   
+}
+
+/*..............................................display product details............................................*/
+const productDetails = async (req,res) => {
+try{
+        const pId = req.params.id;
+        //console.log(pId)
+        req.session.pid = pId;
+        const details = await Product.findById({_id:pId}).lean()
+        //console.log(details)
+        res.render('products/product_details',{user:true,details})
+    
+    }catch(err){
+        throw new Error(err.message)
+    }
+    
 }
 
 
@@ -289,8 +338,9 @@ module.exports = {addPro,
                 updatePro,
                 editProduct,
                 editimage,
+                deleteImage,
                 editimages,
+                deleteImages,
                 products,
-                productDetails,
-                addCart
+                productDetails
             }

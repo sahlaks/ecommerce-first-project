@@ -6,7 +6,7 @@ const path = require('path')
 
 const validationRules=[
     check('username').not().isEmpty().withMessage("Username is required").isLength({min:5}).withMessage('Username must be above 5 characters')
-    .isAlpha().matches(/^[a-zA-Z0-9 ]+$/).withMessage("invalid value"),
+    .matches(/^[a-zA-Z0-9 ]+$/).withMessage("invalid value"),
 
     check('mobilenumber').not().isEmpty().withMessage("Mobile number is required").isLength({min:10,max:10}).withMessage('Mobile number must be 10 digits').isNumeric().withMessage("Invalid mobile number"),
 
@@ -87,6 +87,40 @@ const pwdValidation = (req,res,next)=>{
     console.log(error.mapped())
     if(!error.isEmpty()){
         res.render("user/resetpwd",{err:error.mapped()})
+    }
+    else{
+        next()
+    }
+}
+
+/*.............................change password...........................................*/
+const changepwdRules = [
+    check('newpassword').not().isEmpty().withMessage("Password required").isLength({min:6}).withMessage("Password must be minumum 6 characters").
+    custom(
+        (value) => {
+        // Check if the password contains at least one special character
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+          throw new Error('Password must contain at least one special character');
+        }
+        return true;
+    }
+    ),
+    check('confirmpassword').not().isEmpty().withMessage("Confirm password required").
+    custom((value,{req})=> {
+        if(value != req.body.newpassword){
+            throw new Error('Passwords do not match')
+        }
+        return true;
+    }
+    ),
+    check('currentpassword').not().isEmpty().withMessage("Password required")
+] 
+
+const changepwdValidation = (req,res,next)=>{
+    let error= validationResult(req)
+    console.log(error.mapped())
+    if(!error.isEmpty()){
+        res.render("user/changepwd",{err:error.mapped()})
     }
     else{
         next()
@@ -201,6 +235,54 @@ const productValidation = (req,res,next)=>{
     }
 }
 
+/*...........................................address validation.................................................*/
+const addressRules = [
+    check('fname')
+    .not().isEmpty().withMessage('First name should not be empty'),
+    
+    check('sname')
+    .not().isEmpty().withMessage('Second name should not be empty'),
+    
+    check('pincode')
+    .not().isEmpty().withMessage('Pincode should not be empty')
+    .isNumeric().withMessage('Invalid pincode')
+    .isLength({min:6,max:6}).withMessage('Pincode must be 6 digits'),
+
+    check('locality')
+    .not().isEmpty().withMessage('Locality should not be empty'),
+
+    check('address')
+    .not().isEmpty().withMessage('Address should not be empty'),
+
+    check('district')
+    .not().isEmpty().withMessage('District should not be empty'),
+
+    check('state')
+    .not().isEmpty().withMessage('State should not be empty'),
+
+    check('email')
+    .not().isEmpty().withMessage('Email should not be empty')
+    .isEmail().withMessage('Invalid email'),
+
+    check('mobilenumber')
+    .not().isEmpty().withMessage('Mobilenumber should not be empty')
+    .isLength({min:12,max:12}).withMessage('Mobilenumber must be 12 digits'),
+
+    check('type').isIn(['home', 'work']).withMessage('Invalid radio button value')
+]
+
+const addressValidation = (req,res,next)=>{
+    
+    let error= validationResult(req)
+    console.log(error.mapped())
+    if(!error.isEmpty()){
+        res.render("user/addaddress",{err:error.mapped()})
+    }
+    else{
+        next()
+    }
+}
+
 module.exports = {validationRules,
                 checkValidation,
                 verifyLogin,
@@ -213,5 +295,9 @@ module.exports = {validationRules,
                 categoryValidation,
                 productRules,
                 proValidation,
-                productValidation
+                productValidation,
+                changepwdRules,
+                changepwdValidation,
+                addressRules,
+                addressValidation
                 }

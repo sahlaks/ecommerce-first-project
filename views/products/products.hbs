@@ -3,6 +3,39 @@
     background-color:#FBD2E0;
 }
 
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+.pagination a,
+.pagination .current-page {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+}
+
+.pagination .current-page {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+}
+
+.page-numbers-below {
+    margin-top: 10px;
+}
+
+.page-numbers-below a {
+    margin-right: 10px;
+    text-decoration: none;
+    color: #007bff;
+}
+
 
 </style>
 
@@ -40,11 +73,14 @@
         <div class="row">
           <div class="col-xl-12">
             <div class="search">
-              <div class="form-group col-xs-9" style="display: flex; flex-direction:row;">
-                <input class="form-control" type="text" placeholder="Search" style="height: 50px; font-size:2rem;" />
+              <div class="form-group col-xs-9" style="display: flex; flex-direction:row;"> 
+                <form>
+                <input  type="text" placeholder="Search" name="search" style="font-size:2rem;" />
+                <button type="submit" class="btn" value="search" style="">Search</button>
+                </form>
              </div>
-              <div class="form-group col-xs-3"> 
-                <button type="submit" class=" btn" style="">Search</button>
+               <div class="form-group col-xs-3">  
+               
               </div>
             </div>
           </div>
@@ -60,12 +96,13 @@
                   <a href="/productdetails/{{this._id}}"><img
                       src="/images/{{this.image}}"
                       alt="product image"
+                      style="max-width: 80%;object-fit:contain;"
                     /></a>
                   <div class="img-cap">
                     <a href="/addcart/{{this._id}}"> <span>Add to cart</span></a>
                   </div>
                   <div class="favorit-items">
-                    <a href="/wishlist"><span class="flaticon-heart"></span></a>
+                    <a href="/wishlist/{{this._id}}"><span class="flaticon-heart"></span></a>
                   </div>
                 </div>
                 <div class="popular-caption">
@@ -80,8 +117,21 @@
 
         </div>
 
-      </div>
+      {{#if totalPages}}
+    <div class="pagination">
+        {{#each pages}}
+            {{#if this.isCurrent}}
+                <span class="current-page">{{this.pageNumber}}</span>
+            {{else}}
+                <a href="?page={{this.pageNumber}}">{{this.pageNumber}}</a>
+            {{/if}}
+        {{/each}}
+    </div>
+    {{/if}}
 
+    
+      </div>
     </div>
   </div>
 </div>
+

@@ -65,6 +65,18 @@ h1 {
 .form-control{
     width: 40%;
 }
+
+ #image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .preview-image {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 5px;
+        }
 </style>
 
 
@@ -134,40 +146,110 @@ h1 {
           <input type="number" class="form-control" name="discount" value="{{data.discount}}" />
         </div>
 
-        <div class="form-group">
+        {{!-- <div class="form-group">
           <label for="">Status</label>
           {{#if err.status.path}} <span class="text-danger">{{err.status.msg}}</span> {{/if}}
           <input type="text" class="form-control" name="status" value="{{data.status}}" />
-        </div>
+        </div> --}}
 
         <button type="submit" class="btn btn-warning">Save</button>
         </form>
 
+
         <br>
         <br>
+        <div style="display: flex;flex-direction:row;align-items:center;justify-content:space-around;">
+        <div style=" border: 1px solid #ccc;padding:20px; align-items: center;">
         <form action="/admin/editimage/{{data._id}}" method="post" enctype="multipart/form-data">
         {{#if data.image}}
-        <img src="/images/{{ data.image }}" alt="Category Image" style="max-width: 200px;">
-        <br>
+        <div style="display: flex;" id="imagePreview">
+        <div >
+        <img src="/images/{{ data.image }}" alt="Category Image" style="max-width: 150px;"  >
+        </div>
+        <div style="">
+        <a href="/admin/deleteimage/{{data._id}}"><svg xmlns="http://www.w3.org/2000/svg"  height="15px" width="15px" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg></a><br>
+        </div>
+        </div>
         {{/if}}
         <label for="">Image</label><br>
-        <input type="file" name="image"  class="form-control"><br>
-       
+        <input type="file" name="image"  class="form-control" id="imageInput" style="width:50%" onchange="previewImage()"><br>
         <button type="submit" class="btn btn-warning">Update Image</button>
         </form>
-        
-        <br>
-        <br>
-        <form action="/admin/editimages/{{data._id}}" method="post" enctype="multipart/form-data">
-        <label for="">Choose Multiple Images</label><br>
-        <input type="file" name="images"  class="form-control" multiple accept="image/*"><br>
+        </div>
 
+
+        <div style=" border: 1px solid #ccc;padding:20px; align-items: center;">
+        <form action="/admin/editimages/{{data._id}}" method="post" enctype="multipart/form-data">
+        <div id="image-preview" style="display: flex; flex-direction: row; overflow-x: auto;">
+             {{#each data.subImage}}
+            <div style="margin-right: 5px;">
+                <a href="/admin/deleteimages?name={{this}}">
+                    <svg xmlns="http://www.w3.org/2000/svg"  height="15px" width="15px" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                    </svg>
+                </a>
+            </div>
+        <div>
+        <img src="/images/{{this}}" alt="Category Image" style="max-width: 100px;" id="imagePreview{{@index}}">
+        </div>
+    {{/each}}
+    </div>
+
+        <br><br>
+        <label for="">Choose Multiple Images</label><br>
+        <input type="file" name="images" id="images" class="form-control" multiple accept="image/*"  onchange="previewImages()"><br>
         <button type="submit" class="btn btn-warning">Update Images</button>
         </form>
-
+        </div>
+        </div>
 
     </div>
 </main>
 </div>
+
+
+<script>
+
+  function previewImage() {
+    const input = document.getElementById('imageInput');
+    const preview = document.getElementById('imagePreview');
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const imgElement = preview.querySelector('img');
+
+            if (imgElement) {
+                imgElement.src = e.target.result;
+            }
+        };
+
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+ 
+
+function previewImages() {
+        console.log('this is called')
+        var previewContainer = document.getElementById('image-preview');
+        var filesInput = document.getElementById('images');
+        var files = filesInput.files;
+
+        previewContainer.innerHTML = '';
+
+        for (var i = 0; i < files.length; i++) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var image = document.createElement('img');
+                image.src = e.target.result;
+                image.classList.add('preview-image');
+                previewContainer.appendChild(image);
+            };
+
+            reader.readAsDataURL(files[i]);
+        }
+    }
+</script>
 </body>
 </html>

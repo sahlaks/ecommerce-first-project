@@ -21,8 +21,24 @@ app.use(noche())
 app.use(session({secret: 'my-secret-key',cookie:{maxAge:10000000}}))
 app.use(express.static(path.join(__dirname,'public')))
 
-
-app.engine('hbs',hbs({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials'}))
+app.engine('hbs',hbs({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials',
+                    helpers:{
+                        getStatusColor: function (status) {
+                            switch (status) {
+                              case 'Placed':
+                                return 'green';
+                              case 'Shipped':
+                                return 'blue';
+                              case 'Delivered':
+                                return 'purple';
+                              case 'Cancelled':
+                                return 'red';
+                              default:
+                                return 'gray';
+                            }
+                            },
+                            },
+                            }))
 
 Connection();
 app.use('/',userRouter)

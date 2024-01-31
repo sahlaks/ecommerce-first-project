@@ -2,6 +2,9 @@ const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const User = require("../models/usermodel");
 const Product = require('../models/productmodel');
+const Cart = require("../models/cartmodel");
+const Wishlist = require('../models/wishlistmodel');
+const Address = require('../models/addressmodel');
 
 
 /*...........................................setup nodemailer..................................................*/
@@ -52,9 +55,35 @@ const userIn = async (req,res) => {
 
 /*...............................................home page.....................................................................*/
 const homeRoute = async (req,res) => {
+    try{
+
+    const userId = req.session.uid;
+    //console.log(userId)
     const products = await Product.find().limit(6).lean()
     const newarrival = await Product.find().sort({_id:-1}).limit(3).lean()
-    res.render('user/home',{user:true,products,newarrival})
+    const user = await Cart.findOne({userId:userId})
+    const user1 = await Wishlist.findOne({userId:userId})
+    //console.log(user)
+    if(user){
+        var pr = user.products.length;
+        //console.log(pr)
+        if(!pr){
+            pr = 0;
+        }
+    }
+    if(user1){
+        var pro =user1.products.length
+    }
+    req.session.count = pr;
+    req.session.list = pro;
+    //console.log(req.session.count)
+    var count=req.session.count;
+    var list=req.session.list;
+    res.render('user/home',{user:true,products,newarrival,count,list})
+
+    }catch(error){
+        throw new Error(error.message)
+    }
 }
 
 
@@ -171,9 +200,13 @@ const forgotPass = (req,res) => {
 const verifyMail =async (req,res) => {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
+        if(user.isblocked){
+            res.render('user/forgotpwd',{Error: 'Sorry.. You cannot access the page!'})
+        }else{
         req.session.email = req.body.email;
         req.session.forgotpwd = true;
         res.redirect('sendOtp')
+        }
     }
         else{
             res.render('user/forgotpwd',{Error:'Has your email address changed? Email not found'})
@@ -187,6 +220,191 @@ const contactController = async(req,res)=>{
 
 const aboutController = async(req,res) => {
     res.render('user/about',{user:true})
+}
+
+/*..................................................Profile......................................................*/
+const profile = async (req,res) =>{
+    try{
+        const userId = req.session.uid;
+        const user1 = await User.findOne({_id:userId}).lean()
+        res.render('user/profile',{user:true,user1})
+    }
+    catch(err){
+        throw new Error(err.message)
+    }
+}
+                                    /*....edit profile.....*/
+const editProfile = async (req,res) => {
+    const userId = req.session.uid;
+    //console.log(req.body)
+    try{
+        const data = await User.findByIdAndUpdate({_id:userId},
+                                                    {$set: {username:req.body.username,
+                                                            email:req.body.email,
+                                                            mobilenumber:req.body.mobilenumber}})
+        res.redirect('/profile')
+
+    }catch(err){
+        throw new Error(err.message)
+    }
+
+}
+
+
+/*......................................................address..........................................................*/
+const address = async (req,res) => {
+    try{
+        const userId = req.session.uid;
+        const Error = req.query.error
+        const address = await Address.findOne({userId : userId}).lean()
+        console.log()
+        res.render('user/address',{user:true,address,Error})
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
+                                        /*.......show address........*/
+const addaddress = async (req,res) => {
+    const userId = req.session.uid;
+    const user1 = await User.findOne({_id : userId}).lean()
+    //console.log(user1)
+    res.render('user/addaddress',{user:true,user1})
+}
+                                    /*.......add address........*/
+const addAddress = async (req,res) => {
+    const userId = req.session.uid;
+    const body = req.body;
+    //console.log(req.body)
+
+    try{
+        const user1 = await Address.findOne({userId}).lean()
+        if(user1){
+            const addr = await Address.find({type : body.type})
+            if(addr){
+                res.redirect('/address?error=Address+already+exists')
+            }else{
+            user1.addresses.push(body)
+            await user1.save()
+            }
+        }
+        else{
+        
+            const data = {
+                userId,
+                addresses:[body]
+            }
+            const address = await Address.create(data)
+
+            res.redirect('/address')
+        }
+
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
+                                /*........edit address........*/
+const editAddress = async (req,res) => {
+    const userId = req.session.uid;
+    const Id = req.query.id;
+    const type = req.query.type
+    req.session.type = type;
+    //console.log(type)
+    //console.log(Id)
+    try{
+        const user = await Address.findOne({userId}).lean()
+        if(user){
+        const data = user.addresses.find(p => p._id == Id)
+        //console.log('first')
+        //console.log(data)
+        req.session.address = data
+        res.render('user/editaddress',{user:true,data,type})
+        }
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
+                                    /*....update address....*/
+const updateAddress = async (req,res) => {
+   //console.log('inside post updte')
+    //console.log(req.params.id)
+    //console.log(req.session.type)
+    //console.log(req.body)
+    try{
+        const userId = req.session.uid;
+        const type = req.session.type;
+        const user = await Address.findOne({userId}).lean()
+        //console.log(user)
+        if(user){
+        // //const data = user.addresses.find(p => p._id == Id)
+        const data = await Address.findOneAndUpdate({userId,'addresses.type':type},
+                                        {$set: {
+                                        'addresses.$.fname': req.body.fname,
+                                        'addresses.$.sname': req.body.sname,
+                                        'addresses.$.pincode': req.body.pincode,
+                                        'addresses.$.locality': req.body.locality,
+                                        'addresses.$.address': req.body.address,
+                                        'addresses.$.district': req.body.district,
+                                        'addresses.$.state': req.body.state,
+                                        'addresses.$.landmark': req.body.landmark,
+                                        'addresses.$.phone': req.body.phone,
+                                        'addresses.$.email': req.body.email,
+                                        'addresses.$.mobilenumber': req.body.mobilenumber,
+                                        'addresses.$.type': type,
+                                        }})
+        //console.log('update')
+        //console.log(data)
+        }
+        res.redirect('/address')
+    }catch(err){
+        throw new Error(err.message)
+    }
+    
+}
+                                    /*......delete address......*/
+const deleteAddress = async (req,res) =>{
+    const userId = req.session.uid;
+    const Id = req.params.id;
+    
+    try {
+      const user = await Address.findOne({userId});
+      const exist = user.addresses.find(p => p._id == Id)
+      if(exist){
+          user.addresses.pull(exist)
+      }
+      await user.save();
+      const address = await Address.findOne({userId});
+      if(user.addresses.length == 0){
+            const user1 = await Address.deleteOne({userId})
+      }
+      res.redirect('/address')
+    } catch (err) {
+      throw new Error(err.message)
+    }
+  }
+
+
+/*....................................................change password....................................................*/
+const changepwd = async (req,res) => {
+    const Message = req.query.error
+    res.render('user/changepwd',{user:true, Message})
+}
+
+const changepassword = async (req,res) => {
+    try{
+    const checkPassword = await bcrypt.hash(req.body.currentpassword,10)
+    const user = await User.findOne({email:req.session.email})
+    if(user.password == checkPassword){
+        const hashPassword = await bcrypt.hash(req.body.newpassword,10)
+        req.body.newpassword = hashPassword;
+        const val = await User.updateOne({email:req.session.email},{$set: {password:req.body.newpassword}})
+    
+        res.redirect('/changepwd?error=You+have+successfully+changed+the+password!')
+    }else{
+        res.redirect('/changepwd?error=You+have+entered+wrong+password!')
+    }
+    }catch(err){
+        throw new Error(err.message)
+    }
 }
 
 /*........................................................signout...........................................*/
@@ -213,5 +431,15 @@ module.exports = {userLogin,
                 reSet,
                 contactController,
                 aboutController,
+                profile,
+                editProfile,
+                address,
+                addaddress,
+                addAddress,
+                editAddress,
+                updateAddress,
+                deleteAddress,
+                changepwd,
+                changepassword,
                 signout
             }

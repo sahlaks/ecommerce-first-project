@@ -1,0 +1,316 @@
+ <style>
+.form-control{
+  font-size: 1.6rem;
+}
+#addressForm {
+      display: none;
+    }
+.size{
+font-size: 1.6rem;
+    }
+
+.dropdown-item{
+  width: auto;
+  font-size: 1.5rem;
+}
+ </style>
+ <body>
+ <!-- 
+  <section class="checkout_area section_padding">-->
+          <div class="container">
+           {{!-- <div class="returning_customer">
+              <div class="check_title">
+                <h2>
+                  Returning Customer?
+                  <a href="#">Click here to login</a>
+                </h2>***
+              </div>
+              <p>
+                If you have shopped with us before, please enter your details in the
+                boxes below. If you are a new customer, please proceed to the
+                Billing & Shipping section.
+              </p>
+              <form class="row contact_form" action="#" method="post" novalidate="novalidate">
+                <div class="col-md-6 form-group p_star">
+                  <input type="text" class="form-control" id="name" name="name" value=" " />
+                  <span class="placeholder" data-placeholder="Username or Email"></span>
+                </div>
+                <div class="col-md-6 form-group p_star">
+                  <input type="password" class="form-control" id="password" name="password" value="" />
+                  <span class="placeholder" data-placeholder="Password"></span>
+                </div>
+                <div class="col-md-12 form-group">
+                  <button type="submit" value="submit" class="btn_3">
+                    log in
+                  </button>
+                  <div class="creat_account">
+                    <input type="checkbox" id="f-option" name="selector" />
+                    <label for="f-option">Remember me</label>
+                  </div>
+                  <a class="lost_pass" href="#">Lost your password?</a>
+                </div>
+              </form>
+            </div>
+            <div class="cupon_area">
+              <div class="check_title">
+                <h2>
+                  Have a coupon?
+                  <a href="#">Click here to enter your code</a>
+                </h2>
+              </div>
+              <input type="text" placeholder="Enter coupon code" />
+              <a class="tp_btn" href="#">Apply Coupon</a>
+            </div> --}}
+            <div class="billing_details">
+              <div class="row">
+                <div class="col-lg-8">
+                  <h3>Billing Details</h3>
+                
+                    <div class="dropdown show">
+                    <a style="margin-bottom: 20px; font-size:1.5rem;" class="btn_3 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                     Select Address
+                    </a>
+
+                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="/showaddress?type=home">Home</a>
+                    <a class="dropdown-item" href="/showaddress?type=work">Work</a>
+                    </div>
+                  </div>
+
+                  <form class="row contact_form" action="/postcheckout" id="checkoutForm" method="post" >
+                   <div class="col-md-6 form-group p_star">
+                      <label for="" class="size">First name</label><br>
+                      <input type="text" class="form-control form-control-lg" id="" value="{{addr.fname}}" name="fname" />
+                    </div>
+                    <div class="col-md-6 form-group p_star">
+                      <label for="" class="size">Second name</label><br>
+                      <input type="text" class="form-control form-control-lg" id="" value="{{addr.sname}}" name="sname" />
+                    </div>
+                    <div class="col-md-12 form-group p_star">
+                      <label for="" class="size">Address line</label><br>
+                      <input type="text" class="form-control form-control-lg" id="add2" value="{{addr.address}}" name="address" />
+                      
+                    </div>
+                    <div class="col-md-12 form-group p_star">
+                      <label for="" class="size">Locality</label><br>
+                      <input type="text" class="form-control form-control-lg" id="city" value="{{addr.locality}}" name="locality" />
+                     
+                    </div>
+                    <div class="col-md-12 form-group p_star">
+                      <label for="" class="size">District</label><br>
+                      <input type="text" class="form-control form-control-lg" id="" value="{{addr.district}}" name="district" />
+                     
+                    </div>
+                   
+                    <div class="col-md-12 form-group">
+                      <label for="" class="size">Pincode</label><br>
+                      <input type="text" class="form-control form-control-lg" id="zip" value="{{addr.pincode}}" name="pincode" placeholder="Postcode/ZIP" />
+                    </div>
+                    <div class="col-md-6 form-group p_star">
+                      <label for="" class="size">Mobile number</label><br>
+                      <input type="text" class="form-control form-control-lg" id="number" value="{{addr.mobilenumber}}" name="mobilenumber" />
+                      
+                    </div>
+                    <div class="col-md-6 form-group p_star">
+                      <label for="" class="size">Email</label><br>
+                      <input type="text" class="form-control form-control-lg" id="email" value="{{addr.email}}" name="email" />
+                     
+                    </div>
+                    
+                    {{!-- <div class="col-md-12 form-group p_star" id="dropdown">
+                      <label for="" class="size">Select address</label><br>
+                      <select id="">
+                        
+                        <option value="home">Home</option>
+                        <option value="work">Work</option>
+                      </select>
+                    </div> --}}
+                    
+                  
+                    {{!-- <div class="col-md-12 form-group">
+                      
+                       <label> <input type="checkbox" id="showaddressform" name="selector" />
+                        Add a new address?</label>
+  <div class="order_box" id="addressForm">
+  <form action="" method="post">
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="" placeholder="First name*" name="fname" >
+    </div>
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="" placeholder="Second name*" name="sname">
+    </div>
+  </div>
+  <br>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <input type="number" class="form-control form-control-lg" id="" placeholder="Pincode*" name="pincode">
+    </div>
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="inputText" placeholder="Locality*" name="locality">
+    </div>
+  </div>
+  <br>
+  <div class="form-group">
+    <textarea class="form-control size form-control-lg" id="exampleFormControlTextarea1" rows="3"  placeholder="Address (Area and Street)*" name="address"></textarea> 
+  </div>
+  <br>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="" placeholder="City/District/Town*" name="district">
+    </div>
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="" placeholder="State*" name="state">
+    </div>
+  </div>
+  <br>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <input type="text" class="form-control form-control-lg" id="inputEmail4" placeholder="Landmark(Optional)" name="landmark">
+    </div>
+    <div class="form-group col-md-6">
+      <input type="Number" class="form-control form-control-lg" id="inputNumber" placeholder="Alternate Phone(Optional)" name="phone">
+    </div>
+  </div>
+  <br>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <input type="email" class="form-control form-control-lg" id="" name="email" placeholder="email">
+    </div>
+    <div class="form-group col-md-6">
+      <input type="Number" class="form-control form-control-lg" id="" placeholder="10-digit mobile number*" name="mobilenumber">
+    </div>
+  </div>
+  
+  <div class="form-check form-check-inline">
+  <input class="form-check-input" type="radio" name="type" id="inlineRadio1" value="home">
+  <label class="form-check-label" for="inlineRadio1">Home</label>
+</div>
+<div class="form-check form-check-inline">
+  <input class="form-check-input" type="radio" name="type" id="inlineRadio2" value="work">
+  <label class="form-check-label" for="inlineRadio2">Work</label>
+</div>
+<a class="btn_3" href="#" onclick="saveAndHideForm()">Save</a>
+</form>
+  </div>                    
+  </div> --}}
+                    <div class="col-md-12 form-group"> 
+                      <div class="order_box">
+                      {{!-- <div class="creat_account"> --}}
+                        <h3>Payment Options</h3>
+                        <hr>
+                        <div style="display: flex; justify-content:space-around; font-size:1.6rem">
+                      <label for="cashondelivery"><input type="radio" id="cashondelivery" name="paymentOption" value="cod" /> Cash On Delivery</label>
+                      <label for="creditcard"><input type="radio" id="creditcard" name="paymentOption" value="creditcard" /> Credit/Debit/ATM card</label>
+                      <label for="razorpay"><input type="radio" id="razorpay" name="paymentOption" value="razorpay" /> Razorpay</label>
+                      <div style="display: flex; justify-content: center; margin-top: 20px;">
+      
+   </div>
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: center; margin-top: 20px;">
+                       <button class="btn_3" type="button" onclick="submitOrder()">Place Order</button>
+                      {{!-- <textarea class="form-control form-control-lg" name="message" id="message" rows="1"
+                        placeholder="Order Notes"></textarea> --}}
+                    </div>
+                      </div>
+                  
+                  
+                </div>
+
+                <div class="col-lg-4">
+                  <div class="order_box">
+                    <h2>Your Order</h2>
+                    <ul class="list">
+                      <li>
+                        <a href="#">Product
+                          <span>Total</span>
+                        </a>
+                      </li>
+                      {{#each cartData}}
+                      <li>
+                       <a href="/productdetails/{{this.proId}}"><img src="/images/{{this.product.image}}" style="width: 50px;height:50px;">
+                        {{this.product.productname}} x {{quantity}}</a>
+            
+                        </a>
+                      </li>
+                      {{/each}}
+                      
+                    <ul class="list list_2">
+                      <li>
+                        <a href="#">subtotal
+                          <span>{{subtotal}}</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">Shipping
+                          <span>Free</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">Discount
+                          <span>{{discount}}</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="#">Total
+                          <span>{{total}}</span>
+                        </a>
+                      </li>
+                       <div class="cupon_area">
+              <div class="check_title">
+                <h2>
+                  Have a coupon?
+                </h2>
+              </div>
+              <input style="font-size:1.6rem; margin-left:0px;" type="text" placeholder="Enter coupon code" />
+              <a class="tp_btn" href="#">Apply Coupon</a>
+            </div> 
+                    </ul>
+                    </ul>
+                  </div>
+                  </div>
+                  
+                  </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+
+ <script>
+    
+    document.getElementById('showaddressform').addEventListener('change', function() {
+      var addressForm = document.getElementById('addressForm');
+      addressForm.style.display = this.checked ? 'block' : 'none';
+    }); 
+
+    function submitOrder() {
+    console.log('submitOrder function called');
+
+    const selectedPaymentOption = document.querySelector('input[name="paymentOption"]:checked');
+    const form = document.querySelector('#checkoutForm');
+
+    const requiredFields = ['fname', 'sname', 'address', 'locality', 'district', 'pincode', 'mobilenumber', 'email'];
+    for (const field of requiredFields) {
+        const value = form.querySelector(`[name="${field}"]`).value.trim();
+        if (value === '') {
+            alert(`Please fill in the form fields`);
+            return;
+        }
+    }
+
+    
+
+    if (!selectedPaymentOption) {
+      alert('Please select a payment option');
+      return;
+    }
+    console.log('Form submitted successfully!');
+
+    form.submit();
+    }
+
+  </script>   
+ </body>

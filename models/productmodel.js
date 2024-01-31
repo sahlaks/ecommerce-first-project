@@ -12,8 +12,9 @@ const productSchema = new mongoose.Schema({
             default: function() {
                 return new Date().toDateString()
             }},
-    subImage:[{type:String}]
-
+    subImage:[{type:String}],
+    list : {type:Boolean,
+            default:true}
 
 });
 const Product = mongoose.model("Product",productSchema)

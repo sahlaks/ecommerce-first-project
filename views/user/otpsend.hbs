@@ -6,10 +6,10 @@
     <form action="/otpsend" method="post">
         <div class="mb-3">
         <div class="fontstyle">
-            <p id="otp">
+            <p id="otp"> You have <span id="timeleft"></span>
             </p>
         <label for="otp">Enter the OTP</label>
-        <input type="password"
+        <input type="number"
           class="form-control"
           name="otp"><br>
         <button type="submit"  class="btn btn-warning" id="submitotp">Submit OTP</button>
@@ -30,7 +30,8 @@
  <script>
     var timeLeft = 30;
     function updateTimerandotp(){
-        document.getElementById('otp').innerText = `${timeLeft}`
+        //document.getElementById('otp').innerText = `${timeLeft}`
+        document.getElementById('timeleft').innerText = `${timeLeft} seconds`
         timeLeft--;
         if(timeLeft >= 0){
         var cleartimer = setTimeout(updateTimerandotp,1000);
