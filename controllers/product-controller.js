@@ -20,6 +20,9 @@ const addProduct = async (req,res) => {
 
     console.log(req.body)
     const filepath = req.file.filename;
+    // console.log(req.outputImagePath)
+    // const fileName = req.outputImagePath;
+    // const filepath = path.basename(fileName);
     
     const pro = await Product.create(req.body)
     const productId = pro._id
@@ -92,6 +95,7 @@ const editimage = async (req,res) => {
     const proId = req.params.proId;
     try{
         const newImage = req.file.filename;
+
         console.log(newImage)
         const data = await Product.updateOne({_id: proId},{$set:{image:newImage}})
         res.redirect('/admin/product')
@@ -134,7 +138,7 @@ const deleteImages = async (req,res) => {
         const name = req.query.name;
         const product = await Product.findOne({subImage: {$in:[name] }})
         //console.log(product)
-        //console.log(name)
+        ///console.log(name)
         await Product.findOneAndUpdate({_id:product._id},
                                         {$pull: {subImage: name}})
         const data = await Product.findOne({_id:product._id}).lean()
@@ -143,7 +147,7 @@ const deleteImages = async (req,res) => {
     }catch(err){
         throw new Error(err.message)
     }
-}
+} 
 
 
 

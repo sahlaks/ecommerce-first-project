@@ -1,7 +1,8 @@
 const {check,validationResult} = require('express-validator');
 const multer = require('multer')
 const path = require('path')
-
+const sharp =require('sharp')
+const fs = require('fs').promises
 
 
 const validationRules=[
@@ -214,7 +215,7 @@ const proValidation = (req,res,next)=>{
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
-        res.render("admin/addproduct",{err:error.mapped()})
+        res.render("admin/addproduct",{err:error.mapped(),body:req.body})
     }
     else{
         next()
@@ -272,16 +273,75 @@ const addressRules = [
 ]
 
 const addressValidation = (req,res,next)=>{
-    
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
-        res.render("user/addaddress",{err:error.mapped()})
+        res.render("user/addaddress",{err:error.mapped(),body:req.body})
     }
     else{
         next()
     }
 }
+
+/*..............................................crop images..................................................*/
+const productImgResize = async (req, res, next) => {
+    try {
+      await Promise.all(
+        req.files.map(async (file) => {
+          try {
+            let sharpInstance = sharp(file.path);
+  
+            await sharpInstance
+              .resize({width:300, height:320})
+              .jpeg({ quality: 100 })
+              .toFile(`public/images/products/${file.filename}`);
+  
+            sharpInstance.destroy(); 
+  
+            await fs.promises.unlink(file.path);
+            console.log(`File ${file.filename} deleted successfully.`);
+          } catch (error) {
+            console.error(`Error processing image ${file.filename}: ${error.message}`);
+          }
+        })
+      );
+    } catch (error) {
+      console.error(`Error in productImgResize: ${error.message}`);
+    }
+  
+    next();
+  };
+
+  const productImgResizeSingle = async (req, res, next) => {
+    try {
+        // Check if req.file is present (single file upload)
+        if (!req.file) {
+            throw new Error('No file found in the request.');
+        }
+
+        const file = req.file;
+        console.log(file.path)
+        // Process the single file
+        let sharpInstance = sharp(file.path);
+
+        await sharpInstance
+            .resize(300, 320)
+            .jpeg({ quality: 100 })
+            .toFile(`public/images/products/${file.filename}`);
+
+        sharpInstance.destroy();
+
+        // Delete the original uploaded file
+        await fs.promises.unlink(file.path);
+        console.log(`File ${file.filename} resized and deleted successfully.`);
+    } catch (error) {
+        console.error(`Error in productImgResize: ${error.message}`);
+    }
+
+    next();
+};
+
+
 
 module.exports = {validationRules,
                 checkValidation,
@@ -299,5 +359,7 @@ module.exports = {validationRules,
                 changepwdRules,
                 changepwdValidation,
                 addressRules,
-                addressValidation
+                addressValidation,
+                productImgResize,
+                productImgResizeSingle
                 }

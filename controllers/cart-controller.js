@@ -4,8 +4,21 @@ const Category = require('../models/categorymodel');
 const Cart = require('../models/cartmodel');
 const Wishlist = require('../models/wishlistmodel');
 const Address = require('../models/addressmodel');
+const Wallet = require('../models/walletmodel')
 const { default: mongoose, SchemaType } = require("mongoose");
 const Order = require("../models/ordermodel");
+const Razorpay = require('razorpay')
+require('dotenv').config();
+
+
+/*.......razorpay.........*/
+const raz = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET_KEY,
+})
+
+
+
 
 /*.....................................................add to cart......................................*/
                                                 /*....update database....*/
@@ -305,7 +318,9 @@ const deleteWishlist = async (req,res) => {
 const checkout = async (req,res) => {
     try{
         const userId = req.session.uid;
-        const cart = await Cart.findOne({userId})
+        console.log('_id',userId)
+
+       // const cart = await Cart.findOne({userId})
     
         const result = await Cart.aggregate([
             { $match: { userId: userId } },
@@ -402,8 +417,8 @@ const checkout = async (req,res) => {
         console.log(sum)
         const { subtotal,discount,total } = sum[0]
         let user = await Address.findOne({userId})
-       // console.log('user',user)
-        if(user){
+       console.log('user address',user)
+    if(user){
         const address = await Address.aggregate([
                                                 {$match: {
                                                     userId:userId,
@@ -418,20 +433,21 @@ const checkout = async (req,res) => {
                                                     }
                                                 }
                                                 ])
-       //console.log(address);
-       //console.log('checkout');
-       //console.log(address[0].addresses);
-       var addr;
-        addr = (address[0].addresses);
-        req.session.checkoutaddress = addr
-        res.render('products/checkout',{user:true,cartData: result, subtotal,discount,total,addr})
-        }
-        else{
-            addr= null;
-            res.render('products/checkout',{user:true,cartData: result, subtotal,discount,total,addr})
-        }
-         
-        }catch(err){
+        if (address.length > 0 && address[0].addresses) {
+            var addr;
+            addr = address[0].addresses;
+            req.session.checkoutaddress = addr;
+            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+            }
+        else {
+            var addr = null;
+            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+            }
+    }else{
+        var addr = null;
+        res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+    }
+    }catch(err){
         throw new Error(err.message)
     }
 }
@@ -565,7 +581,7 @@ const takeAddress = async (req,res) => {
     }else{
         res.render('products/checkout',{user:true,addr, cartData: result, subtotal,discount,total})
     }
-    }catch(err){
+    }catch(err){    
         throw new Error(err.message)
     }
 }
@@ -719,19 +735,31 @@ const checkoutForm = async (req,res) => {
             discount:discount,
             total:total,
         })
-    
+        
     })
         // await orderlist.save();
         const newOrder = await Order.create(orderlists);
         console.log(newOrder)
 
-    if (selectedPaymentOption === 'cod') {
+    if (selectedPaymentOption === 'COD') {
        await Cart.deleteOne({_id:req.session.cartid})
         res.render('products/cod-success',{user:true,formData,subtotal,discount,total})
     }
-    else{
-        var addr =  req.session.checkoutaddress;
-        res.render('products/success')
+    else if(selectedPaymentOption === 'Razorpay') {
+        //var addr =  req.session.checkoutaddress;
+        const razorpayOrder = await raz.orders.create({
+            amount: total*100, //amount in paisa (100) 
+            currency: 'INR',
+            receipt: 'order_receipt_123',
+          });
+          console.log(razorpayOrder);
+          req.session.razorid = razorpayOrder.id;
+          req.session.razorpayOrder = razorpayOrder;
+         // const razpayid = req.session.razorid;
+       res.render('products/success',{keyId:process.env.RAZORPAY_KEY_ID,razorpayOrder,formData,subtotal,discount,total})
+    }
+    else if(selectedPaymentOption === 'Wallet'){
+
     }
 
     }catch(err){
@@ -739,6 +767,36 @@ const checkoutForm = async (req,res) => {
     }
 }
 
+/*.............................................razorpay validate......................................*/
+const razorpayChecking = async (req,res)=>{
+    try{
+    //console.log(req.body)
+    var crypto = require('crypto')
+    var razorpaysecret = process.env.RAZORPAY_SECRET_KEY;
+    // console.log(razorpaysecret)
+    // console.log(req.session.razorid)
+    var hmac = crypto.createHmac("sha256",razorpaysecret)
+    hmac.update(req.session.razorid + "|" + req.body.razorpay_payment_id);
+    hmac = hmac.digest("hex");
+    
+    if(hmac == req.body.razorpay_signature){
+    
+        console.log("payment successful");
+        await Cart.deleteOne({_id:req.session.cartid})
+        res.render('products/razorpaysuccess',{user:true})
+    }else{
+        console.log("payment not successfull")
+        await Order.deleteMany({cartid:req.session.cartid})
+        res.send('payment failed')
+    }
+}catch(error){
+    res.status(500).send('Something went wrong').json({err:error.message})
+}
+
+} 
+
+
+/*..............................view order.........................................*/
 const viewOrder = async (req,res) => {
     try{
         const user = req.session.uid;
@@ -837,6 +895,25 @@ const viewOrderList = async (req,res) => {
         });
     });
     const combinedOrders = Array.from(groupedOrders.values());
+    console.log(combinedOrders)
+    var value = combinedOrders[0].status;
+
+    let resultplaced = false;
+    let resultshipped = false;
+    let resultdelivered = false;
+    let result = false;
+
+    if(value === 'Placed'){
+       resultplaced = true;
+    }else if(value === 'Shipped'){
+        resultshipped = true;
+    }else if(value === 'Delivered'){
+       resultdelivered = true;
+    }else{
+        result = true;
+    }
+
+    console.log(resultplaced,resultshipped,resultdelivered,result)
     res.render('products/vieworder',{user:true,combinedOrders,orderId})
     
     }catch(err){
@@ -844,14 +921,44 @@ const viewOrderList = async (req,res) => {
     }
 }
 
+
+
 const cancelOrder = async (req,res) => {
     try{
-        const orderid = req.params.oid;
+        const orderid = req.query.oid;
+        console.log("cartid ",orderid);
         const order = await Order.updateMany({cartid: orderid},{$set:{status:'Cancelled'}});
         console.log(order)
         res.render('products/cancelorder',{user:true})
     }catch(err){
         throw new Error(err.message)
+    }
+}
+
+const returnOrder = async (req,res) => {
+    try{
+        const orderid = req.query.oid;
+        const order = await Order.updateMany({cartid: orderid},{$set:{status:'Returned'}});
+        const user = await Order.findOne({cartid:orderid});
+        console.log(user);
+        const id = user.userId;
+        const sum = user.total;
+        const wallet = await Wallet.findOne({userId:id})
+        if(wallet){
+            Wallet.updateOne({userId:id},{$inc:{amount:total}})
+        }
+        res.render('products/returnorder',{user:true,id,sum})
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
+
+const viewWallet = async (req,res) => {
+    try{
+        console.log(req.body.id)
+        console.log(req.body.sum)
+    }catch(err){
+        throw new Error(err.message);
     }
 }
 
@@ -868,5 +975,8 @@ module.exports = {
                 checkoutForm,
                 viewOrder,
                 viewOrderList,
-                cancelOrder
+                cancelOrder,
+                razorpayChecking,
+                returnOrder,
+                viewWallet
                 }

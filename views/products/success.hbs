@@ -1,1 +1,100 @@
-<h1>ordered successfully</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+    <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+
+    </style>
+</head>
+
+<body>
+<section class="confirmation_part section_padding">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="confirmation_tittle">
+<form action="/razorpay/callback" method="POST">
+    <input type="hidden" name="razorpay_order_id" value="{{ razorpayOrder.id }}">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"
+          data-key="{{ keyId }}"
+          data-amount="{{ razorpayOrder.amount }}"
+          data-currency="INR"
+          data-order_id="{{ razorpayOrder.id }}"
+          data-buttontext="Pay with Razorpay"
+          data-name="{{formData.fname}}"
+          data-description="Purchase Description"
+          data-image="your_logo_url"
+          data-prefill.name="{{ formData.fname }}"
+          data-prefill.email="{{ formData.email }}"
+          data-theme.color="#F37254">
+    </script>
+</form>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+{{!-- <h1>Razorpay Checkout</h1>
+ <button onclick="createOrder()">Create Order</button>
+
+
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": {{keyId}}, 
+    "amount": {{razorpayOrder.amount}}, 
+    "currency": "INR",
+    "name": {{formData.fname}},
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    "order_id": {{razorpayOrder.id}}, 
+    "handler": function (response){
+        alert(response.razorpay_payment_id);
+        alert(response.razorpay_order_id);
+        alert(response.razorpay_signature)
+    },
+    "prefill": {
+        "name": {{formData.fname}},
+        "email": {{formData.email}},
+        "contact": {{formData.mobilenumber}}
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+var rzp1 = new Razorpay(options);
+rzp1.on('payment.failed', function (response){
+        alert(response.error.code);
+        alert(response.error.description);
+        alert(response.error.source);
+        alert(response.error.step);
+        alert(response.error.reason);
+        alert(response.error.metadata.order_id);
+        alert(response.error.metadata.payment_id);
+});
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+</body>
+</html> --}}

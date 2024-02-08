@@ -65,21 +65,21 @@ const homeRoute = async (req,res) => {
     const user1 = await Wishlist.findOne({userId:userId})
     //console.log(user)
     if(user){
-        var pr = user.products.length;
+        var cart = user.products.length;
         //console.log(pr)
-        if(!pr){
-            pr = 0;
+        if(!cart){
+            cart = 0;
         }
     }
     if(user1){
-        var pro =user1.products.length
+        var list =user1.products.length
     }
-    req.session.count = pr;
-    req.session.list = pro;
+    req.session.cartCount = cart;
+    req.session.listCount = list;
     //console.log(req.session.count)
-    var count=req.session.count;
-    var list=req.session.list;
-    res.render('user/home',{user:true,products,newarrival,count,list})
+    var count=req.session.cartCount;
+    var list=req.session.listCount;
+    res.render('user/home',{user:true,products,newarrival,cart,list})
 
     }catch(error){
         throw new Error(error.message)
@@ -263,7 +263,7 @@ const address = async (req,res) => {
         throw new Error(err.message)
     }
 }
-                                        /*.......show address........*/
+                                    /*.......show address........*/
 const addaddress = async (req,res) => {
     const userId = req.session.uid;
     const user1 = await User.findOne({_id : userId}).lean()
@@ -277,6 +277,7 @@ const addAddress = async (req,res) => {
     //console.log(req.body)
 
     try{
+
         const user1 = await Address.findOne({userId}).lean()
         if(user1){
             const addr = await Address.find({type : body.type})

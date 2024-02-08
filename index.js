@@ -8,6 +8,16 @@ const session = require('express-session')
 const noche = require('nocache')
 const multer = require('multer')
 const path = require('path')
+const Razorpay = require('razorpay')
+require('dotenv').config();
+
+
+/*.......razorpay.........*/
+const raz = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET_KEY,
+})
+
 
 
 /*.......route........*/
@@ -20,6 +30,13 @@ app.use(bodyParser.urlencoded({extended:false}))
 app.use(noche())
 app.use(session({secret: 'my-secret-key',cookie:{maxAge:10000000}}))
 app.use(express.static(path.join(__dirname,'public')))
+
+app.use((req, res, next) => {
+  res.locals.username = req.session.username || null;
+  res.locals.cartCount = req.session.cartCount || 0;
+  res.locals.listCount = req.session.listCount || 0;
+  next();
+});
 
 app.engine('hbs',hbs({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials',
                     helpers:{
@@ -37,6 +54,9 @@ app.engine('hbs',hbs({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+
                                 return 'gray';
                             }
                             },
+                            eq: function (a, b, options) {
+                              if (a == b) { return options.fn(this); }
+                            }
                             },
                             }))
 

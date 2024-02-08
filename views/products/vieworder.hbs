@@ -79,23 +79,7 @@ h1 {
     width: 40%;
 }
 
-  .order-container {
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .product-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .product-item {
-            margin-bottom: 10px;
-        }
-    p{
-        line-height: 5px;
-    }
+  
 
     .order-container {
             border: 1px solid #ccc;
@@ -118,7 +102,10 @@ h1 {
             margin-bottom: 20px;
         
         }
-        p{
+.order-container-address p{
+    line-height: 5px;
+}
+        .heading p{
             line-height: 10px;
         }
 .information-container{
@@ -210,6 +197,7 @@ h1 {
     width: 50% !important;
 }
 
+
 #progressbar li.active:before,
 #progressbar li.active:after {
     background: #4bb8a9; 
@@ -223,7 +211,7 @@ h1 {
 <div class="main" style="display: flex; flex-direction: row;">
 <div class="sidebar">
     <ul class="ul">
-            <p class="heading">Hello,<br>{{user1.username}}</p>
+            <p class="heading">Hello,<br>{{username}}</p>
             <p>Account Settings</p>
             <li> <a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></a><a href="/profile" class="names">My Information</a></li>
             <br>
@@ -253,7 +241,7 @@ h1 {
                     <li class="step0 active " id="step1">PLACED</li>
                     <li class="step0 active text-center" id="step2">SHIPPED</li>
                     <li class="step0  active text-right" id="step3">DELIVERED</li>
-                    <li class="step0  active text-right" id="step4">CANCELLED</li>
+                
                 </ul>
             </div>
         </div>
@@ -265,22 +253,22 @@ h1 {
             <p><span>{{address}},{{locality}},{{district}},{{pincode}} </span> </p>
             <p> <span>mob: {{mobilenumber}} </span></p>
          </div>
+
          <div class="order-container-address">
              <h3><strong>Shipping Information</strong></h3>
             <p><strong> <span>Payment Type </span></strong></p>
             <p><span>{{paymentoption}} </span> </p>
          </div>
-         <div class="order-container-address">
-            <h3><strong >Order Status :<span style="color: {{getStatusColor this.status}}">{{status}}</span></strong></h3>
-         </div>
-           <div class="order-container-address">
-            <a href="/cancelorder/{{cartid}}" class="btn btn-warning" >
-                 Cancel Order
-            </a>
 
-    
-         </div>
-         </div>
+         <div class="order-container-address">
+            <h3><strong >Order Status :<span id="orderStatus" style="color: {{getStatusColor this.status}}"> <span id="status">{{status}}</span></span></strong>
+            </h3>
+        </div>
+            
+           <div class="order-container-address">
+            <span id="changeStatus"></span>
+        </div>
+        </div>
 
         <div class="container-fluid">
         <div class="information-container">
@@ -296,7 +284,7 @@ h1 {
         </thead>
         <tbody>
            
-            <h3>Items from order: <span>{{cartid}} </span></h3>
+            <h3>Items from order: <span id="cartid">{{cartid}} </span></h3>
             
             <tr>
                 {{#each products}}
@@ -322,6 +310,7 @@ h1 {
          </tr>
         </thead>
         <tbody>
+           
 
             <tr>
                 <td><span>Sub Total</span></td>
@@ -332,6 +321,7 @@ h1 {
                 <td><span>0</span></td>
             </tr>
             <tr>
+                
                 <td><span>Discount:</span></td>
                 <td><span>{{discount}}</span></td>
             </tr>
@@ -352,6 +342,17 @@ h1 {
         
     </main>
 </div>
+<script>
+let status =document.getElementById("status").innerHTML
+let cartid =document.getElementById("cartid").innerHTML
+//console.log(cartid)
+if(status=='Delivered'){
+    document.getElementById("changeStatus").innerHTML = ` <a href="/returnorder?oid=${cartid}" class="btn" style="background-color: green;color: white;">Return</a>`
+}
+if(status=='Placed'||status=='Shipped'){
+    document.getElementById("changeStatus").innerHTML = ` <a href="/cancelorder?oid=${cartid}" class="btn" style="background-color: green;color: white;">Cancel</a>`
+}
 
+</script>
 </body>
 </html>

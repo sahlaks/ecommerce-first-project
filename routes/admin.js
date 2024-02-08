@@ -1,6 +1,6 @@
 const express = require('express');
 const { adminLogin, adLoginPost, getDashboard, getProduct, getCategory, getOrder, getUsers, logout, getCategoryPage, isBlocked, deleteOrder, editOrder, setStatus, listProduct } = require('../controllers/admin-controller');
-const { verifyAdmin, upload, categoryRules, categValidation, categoryValidation, productRules, proValidation, productValidation } = require('../middlewares/middlewares');
+const { verifyAdmin, upload, categoryRules, categValidation, categoryValidation, productRules, proValidation, productValidation, productImgResize, productImgResizeSingle } = require('../middlewares/middlewares');
 const { addPro, addProduct, addCategory, listCategory, deleteCategory, editCat, editcategory, updateimage, deleteProduct, updatePro, editProduct, editimage, editimages, deleteImage, deleteImages } = require('../controllers/product-controller');
 const app = express.Router();
 
@@ -24,7 +24,7 @@ app.get('/editproduct/:id',verifyAdmin,updatePro)
 app.post('/editproduct/:id',verifyAdmin,productRules,productValidation,editProduct)
 app.post('/editimage/:proId',verifyAdmin,upload.single('image'),editimage)
 app.get('/deleteimage/:id',verifyAdmin,deleteImage)
-app.post('/editimages/:proId',verifyAdmin,upload.array('images',6),editimages)
+app.post('/editimages/:proId',verifyAdmin,upload.array('images',6),productImgResize,editimages)
 app.get('/deleteimages',verifyAdmin,deleteImages)
 
 

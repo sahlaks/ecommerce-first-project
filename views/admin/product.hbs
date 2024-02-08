@@ -64,6 +64,39 @@ h1 {
         display:none;
     }
 }
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+.pagination a,
+.pagination .current-page {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+}
+
+.pagination .current-page {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+}
+
+.page-numbers-below {
+    margin-top: 10px;
+}
+
+.page-numbers-below a {
+    margin-right: 10px;
+    text-decoration: none;
+    color: #007bff;
+}
 </style>
 
 
@@ -107,17 +140,18 @@ h1 {
         </form>
         </div> --}}
 
-        {{!-- <form class="form-inline">
-  
-  <div class="form-group mx-sm-3 mb-2">
+    <form class="form-inline">
+    <div class="form-group mx-sm-3 mb-2">
     <label for="inputPassword2" class="sr-only"></label>
-    <input type="text" class="form-control" id="inputPassword2" placeholder="Search">
-  </div>
-  <button type="submit" class="btn btn-warning mb-2">Search</button>
-</form> --}}
+    <input type="text" name="search" class="form-control" id="inputPassword2" placeholder="Search">
+    </div>
+    <button type="submit" class="btn btn-warning mb-2" value="search">Search</button>
+    </form>
+
+
     <h3>Listed ones</h3>
     <div class="container-fluid">
-    <table class="table" id="myTable">
+    <table  id="myTable" class="table" class="table table-striped">
     <thead>
     <tr>
       <th scope="col">#</th>
@@ -158,10 +192,24 @@ h1 {
     </tbody>
     </table>
     </div>
+
+     {{#if totalPages}}
+    <div class="pagination">
+        {{#each pages}}
+            {{#if this.isCurrent}}
+                <span class="current-page">{{this.pageNumber}}</span>
+            {{else}}
+                <a href="?page={{this.pageNumber}}">{{this.pageNumber}}</a>
+            {{/if}}
+        {{/each}}
+    </div>
+    {{/if}}
+
+
     <hr>
         <h3>Unlisted ones</h3>
     <div class="container-fluid">
-    <table class="table" id="myTable">
+    <table class="table mt-5" >
     <thead>
     <tr>
       <th scope="col">#</th>
@@ -204,11 +252,12 @@ h1 {
 </main>
 </div>
 
-   <script>
-  $(document).ready( function () {
+{{!-- <script>
+$(document).ready( function () {
     $('#myTable').DataTable();
-} );
-</script>
+} );
+</script> --}}
+
 
 </body>
 </html>

@@ -2,7 +2,7 @@ const express = require('express');
 const { signupGetController, createUser, userLogin, userIn, homeRoute, checkOtp, forgotPass, verifyMail, failOtp, sendOtp, getOtp, reSendOtp, resetPwd, reSet, contactControler, contactController, aboutController, signout, profile, address, editProfile, addAddress, addaddress, deleteAddress, changepwd, editAddress, updateAddress, changepassword } = require('../controllers/user-controller');
 const { validationRules, checkValidation, verifyLogin, pwdValidation, resetPwdRules, changepwdRules, changepwdValidation, addressValidation, addressRules } = require('../middlewares/middlewares');
 const { products, productDetails} = require('../controllers/product-controller');
-const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder} = require('../controllers/cart-controller');
+const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder, razorpayChecking, fetchStatus, returnOrder, updateWallet} = require('../controllers/cart-controller');
 const app = express.Router();
 
 
@@ -63,18 +63,23 @@ app.get('/wishlist/:pid',verifyLogin,wishlist)
 app.get('/wishlistview',verifyLogin,wishlistView)
 app.get('/deleteWishlist/:pid',verifyLogin,deleteWishlist)
 
+
 /*...................................................checkout....................................................*/
 app.get('/checkout',verifyLogin,checkout)
 app.get('/showaddress',verifyLogin,takeAddress)
 app.post('/postcheckout',verifyLogin,checkoutForm)
+app.post('/razorpay/callback',razorpayChecking);
 app.get('/vieworder',verifyLogin,viewOrder)
 app.get('/editorder/:oid',verifyLogin,viewOrderList)
-app.get('/cancelorder/:oid',verifyLogin,cancelOrder)
+app.get('/cancelorder',verifyLogin,cancelOrder)
+app.get('/returnorder',verifyLogin,returnOrder)
+app.post('/wallet',updateWallet)
 
-
+/*................................................profile...........................................................*/
 app.get('/profile',verifyLogin,profile)
-app.post('/editprofile',editProfile)
+app.get('/editprofile',editProfile)
 
+/*................................................address..........................................................*/
 app.get('/address',verifyLogin,address)
 app.get('/addaddress',verifyLogin,addaddress)
 app.post('/addaddress',verifyLogin,addressRules,addressValidation,addAddress)
@@ -82,9 +87,11 @@ app.get('/editaddress',verifyLogin,editAddress)
 app.post('/editaddress/:id',verifyLogin,updateAddress)
 app.get('/deleteaddress/:id',verifyLogin,deleteAddress)
 
+
 /*........................................change password....................................................*/
 app.get('/changepwd',verifyLogin,changepwd)
 app.post('/changepassword',verifyLogin,changepwdRules,changepwdValidation,changepassword)
+
 
 /*................................................signout....................................................*/
 app.get('/signout',verifyLogin,signout)

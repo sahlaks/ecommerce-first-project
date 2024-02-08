@@ -52,19 +52,165 @@ const adLoginPost = async (req,res) => {
 
 
 /*..................................................dashboard access...................................................*/
-const getDashboard = (req,res) => {
-    res.render('admin/dashboard')
+const getDashboard = async (req,res) => {
+    try{
+        const category = await Category.find().lean()
+        //console.log(category)
+        //console.log(JSON.stringify(category))
+        const categories = JSON.stringify(category)
+       
+        Order.updateMany({}, [
+            {
+              $set: {
+                date: {
+                  $toDate: '$date' // Convert the date string to a Date object
+                }
+              }
+            }
+          ])
+            .then(result => {
+              console.log(`${result.modifiedCount} document(s) updated successfully.`);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
+        const result = await Order.aggregate([
+        {
+          $group: {
+            _id: '$category', 
+            quantity: { $sum: '$quantity' },
+          },
+        },
+        {
+          $project: {
+            _id: 0, 
+            category: '$_id',
+            quantity: 1,
+          },
+        },
+      ]);
+        console.log(result)
+
+        const data = await Order.aggregate([
+            {
+              $group: {
+                _id: '$date',
+                totalSales: { $sum: '$total' }
+              }
+            },
+            {
+              $sort: { _id: 1 }
+            }
+          ]);
+          console.log(data)
+
+          const weeklySales = await Order.aggregate([
+            {
+              $match: {
+                date: {
+                  $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
+                }
+              }
+            },
+            {
+              $group: {
+                _id: { $week: { $toDate: "$date" } }, // Convert 'date' to a date object
+                totalSales: { $sum: "$total" }
+              }
+            }
+          ]);
+          console.log(weeklySales)
+
+          const monthlySales = await Order.aggregate([
+            {
+              $group: {
+                _id: { $month: '$date' },
+                totalSales: { $sum: '$total' }
+              }
+            }
+          ]);
+          console.log('monthly',monthlySales);
+        
+          const totalSales = await Order.aggregate([
+            {
+              $group: {
+                _id: null,
+                totalSales: { $sum: '$quantity' }
+              }
+            }
+          ]);
+        console.log(totalSales)
+
+        const totalRevenue = await Order.aggregate([
+            {
+              $group: {
+                _id: null,
+                totalRevenue: { $sum: '$total' }
+              }
+            }
+          ]);
+        console.log(totalRevenue)
+        res.render('admin/dashboard',{data: JSON.stringify(result),sales: JSON.stringify(totalSales),revenue: JSON.stringify(totalRevenue)})
+    }catch(err){ 
+        throw new Error(err.message)
+    }
 }
+
+
 
 /*.................................................product page...........................................*/
 const getProduct = async (req,res) => {
     try{
-         
-    const products = await Product.find({list:true}).lean();
+        var search = '';
+        if(req.query.search){
+                search = req.query.search;
+        }
+        var page = 1;
+        if(req.query.page){
+                page = req.query.page;
+        }
+
+        
+        const limit = 6;
+        const products = await Product.find({
+            list:true,
+            $or:[
+                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                {category : {$regex: '.*'+search+'.*',$options:'i'} },
+            ]
+        })
+        .limit( limit * 1 )
+        .skip( (page - 1) * limit )
+        .lean()
+
+        const count = await Product.find({
+            list:true,
+            $or:[
+                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                {category : {$regex: '.*'+search+'.*',$options:'i'} },
+            ]
+        }).countDocuments();
+
+        const totalPages = Math.ceil(count/limit);
+        const currentPage = page;
+
+        const pages = [];
+        for (let j = 1; j <= totalPages; j++) {
+            pages.push({
+                        pageNumber: j,
+                        isCurrent: j == currentPage,
+                        });
+}
+     
+    //const products = await Product.find({list:true}).lean();
     const unlist = await Product.find({list:false}).lean();
 
    // console.log(products)
-    res.render('admin/product',{products,unlist})
+    res.render('admin/product',{products,unlist,
+                                                totalPages,
+                                                currentPage,
+                                                pages,})
     }catch(err){
         throw new Error(err.message)
     }

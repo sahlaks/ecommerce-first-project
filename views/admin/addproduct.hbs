@@ -102,41 +102,41 @@ h1 {
     <form action="/admin/addproduct" method="post" enctype="multipart/form-data">
         <label for="">Product Name</label><br>
         {{#if err.productname.path}} <span class="text-danger">{{err.productname.msg}}</span> {{/if}}
-        <input type="text" name="productname" class="form-control"><br>
+        <input type="text" name="productname" class="form-control" value="{{body.productname}}"><br>
 
         <label for=""> Select Category</label><br>
         {{#if err.category.path}} <span class="text-danger">{{err.category.msg}}</span> {{/if}}
         <select name="category" class="form-control" id="">
             {{#each category}}
-            <option value="{{category}}">{{category}}</option>
+            <option value="{{category}}">{{category}}{{body.category}}</option>
             {{/each}}    
         </select><br>
         <br><br>
         <label for="">Description</label><br>
         {{#if err.description.path}} <span class="text-danger">{{err.description.msg}}</span> {{/if}}
         <!--<input type="text" name="description" class="form-control"><br><br>-->
-        <textarea class="form-control" type="text" rows="3" name="description"></textarea><br>
+        <textarea class="form-control" type="text" rows="3" name="description">{{body.description}}</textarea><br>
 
         <label for="image" class="form-label">Image</label><br>
         {{#if err.image.path}} <span class="text-danger">{{err.image.msg}}</span> {{/if}}
-        <input class="form-control" type="file" name="image">
+        <input class="form-control" type="file" name="image" value="{{body.image}}">
         <br><br>
         
         <label for="">Price</label><br>
         {{#if err.price.path}} <span class="text-danger">{{err.price.msg}}</span> {{/if}}
-        <input type="number" name="price" class="form-control"><br><br>
+        <input type="number" name="price" class="form-control" value="{{body.price}}"><br><br>
        
         <label for="">Quantity</label><br>
         {{#if err.quantity.path}} <span class="text-danger">{{err.quantity.msg}}</span> {{/if}}
-        <input type="number" name="quantity" class="form-control"><br><br>
+        <input type="number" name="quantity" class="form-control" value="{{body.quantity}}"><br><br>
         
         <label for="">Discount</label><br>
         {{#if err.discount.path}} <span class="text-danger">{{err.discount.msg}}</span> {{/if}}
-        <input type="number" name="discount" class="form-control"><br><br>
+        <input type="number" name="discount" class="form-control" value="{{body.discount}}"><br><br>
         
         <label for="">Status</label><br>
         {{#if err.status.path}} <span class="text-danger">{{err.status.msg}}</span> {{/if}}
-        <input type="text" name="status" class="form-control"><br><br>
+        <input type="text" name="status" class="form-control"><br><br> 
     
 
         <button type="submit" class="btn btn-warning">Submit</button>
