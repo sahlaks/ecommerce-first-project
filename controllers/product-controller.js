@@ -2,7 +2,8 @@ const Product = require("../models/productmodel")
 const Category = require("../models/categorymodel")
 const Cart = require("../models/cartmodel")
 const Wishlist = require("../models/wishlistmodel")
-
+var showproducts;
+var countprod;
 
 /*..............................................add product......................................................*/
 const addPro = async (req,res) => {
@@ -264,28 +265,119 @@ const products = async (req,res) => {
                 page = req.query.page;
         }
 
-        
         const limit = 6;
-        const products = await Product.find({
-            list:true,
-            $or:[
-                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
-                {category : {$regex: '.*'+search+'.*',$options:'i'} },
-            ]
-        })
-        .limit( limit * 1 )
-        .skip( (page - 1) * limit )
-        .lean()
 
-        const count = await Product.find({
-            list:true,
-            $or:[
-                {productname: {$regex:'.*'+search+'.*',$options:'i'} },
-                {category : {$regex: '.*'+search+'.*',$options:'i'} },
-            ]
-        }).countDocuments();
+        const priceRange = req.query.priceRange;
+        console.log('price',priceRange)
+        const filter = req.query.category || [];
+        const sortOption = req.query.sort; 
+        console.log(filter)
+        console.log(sortOption)
+        
+        if(filter.length > 0){
+            const parsedPriceRange = priceRange.split(',').map(Number);
+            const minPrice = 0;
+            const maxPrice = parsedPriceRange[0] || Number.MAX_VALUE;
+            // console.log('Parsed Price Range:', parsedPriceRange);
+            // console.log('Min Price:', minPrice);
+            // console.log('Max Price:', maxPrice);
 
-        const totalPages = Math.ceil(count/limit);
+            if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+                
+                const categoryFilter = filter.length > 0 ? { category: { $in: filter } } : {};
+               // console.log('combined',categoryFilter)
+                const priceFilter = {
+                    price: {
+                        $gte: minPrice,
+                        $lte: maxPrice,
+                    },
+                };
+                const combinedFilter = {
+                    list: true,
+                    $and: [categoryFilter, priceFilter],
+                };
+                
+                if(sortOption){
+
+                    let sortOptionval;
+                    if (sortOption === 'highToLow') {
+                        sortOptionval = -1; 
+                    } else {
+                        sortOptionval = 1; 
+                    }
+
+                showproducts = await Product.find(combinedFilter)
+                .limit( limit * 1 )
+                .sort({ price: sortOptionval })
+                .skip( (page - 1) * limit )
+                .lean();
+               // console.log('Show Products:', showproducts);
+
+                }else{
+                    showproducts = await Product.find(combinedFilter).lean();
+                }
+
+                countprod = await Product.countDocuments(combinedFilter);
+                console.log('Count:', countprod);
+
+            } else {
+                console.log('Invalid priceRange values');
+            }
+
+        }else{
+
+            if(sortOption){
+
+                let sortOptionval;
+                if (sortOption === 'highToLow') {
+                    sortOptionval = -1; 
+                } else {
+                    sortOptionval = 1; 
+                }
+
+                showproducts = await Product.find({
+                    list:true,
+                    $or:[
+                    {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                    {category : {$regex: '.*'+search+'.*',$options:'i'} },
+                    ]
+                    })
+                    .limit( limit * 1 )
+                    .skip( (page - 1) * limit )
+                    .sort({price : sortOptionval})
+                    .lean()
+
+                countprod = await Product.find({
+                    list:true,
+                    $or:[
+                        {productname: {$regex:'.*'+search+'.*',$options:'i'} },
+                        {category : {$regex: '.*'+search+'.*',$options:'i'} },
+                        ]
+                    }).countDocuments();
+                
+                }else{
+                    showproducts = await Product.find({
+                        list: true,
+                        $or: [
+                            { productname: { $regex: '.*' + search + '.*', $options: 'i' } },
+                            { category: { $regex: '.*' + search + '.*', $options: 'i' } },
+                        ]
+                    })
+                        .limit(limit * 1)
+                        .skip((page - 1) * limit)
+                        .lean();
+    
+                    countprod = await Product.find({
+                        list: true,
+                        $or: [
+                            { productname: { $regex: '.*' + search + '.*', $options: 'i' } },
+                            { category: { $regex: '.*' + search + '.*', $options: 'i' } },
+                        ]
+                    }).countDocuments();
+                }
+                
+            }
+        const totalPages = Math.ceil(countprod/limit);
         const currentPage = page;
 
         const pages = [];
@@ -298,9 +390,11 @@ const products = async (req,res) => {
 
         // console.log('search',products)
         // const products = await Product.find().lean()
+        const existingCategories = req.query.category || [];
         const category = await Category.find().lean()
-        res.render('products/products',{user:true,products,
+        res.render('products/products',{user:true,showproducts,
                                         category,
+                                        existingCategories,
                                         totalPages,
                                         currentPage,
                                         pages,
@@ -315,7 +409,7 @@ const products = async (req,res) => {
 const productDetails = async (req,res) => {
 try{
         const pId = req.params.id;
-        //console.log(pId)
+        //console.log(pId)   
         req.session.pid = pId;
         const details = await Product.findById({_id:pId}).lean()
         //console.log(details)

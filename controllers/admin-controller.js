@@ -55,8 +55,6 @@ const adLoginPost = async (req,res) => {
 const getDashboard = async (req,res) => {
     try{
         const category = await Category.find().lean()
-        //console.log(category)
-        //console.log(JSON.stringify(category))
         const categories = JSON.stringify(category)
        
         Order.updateMany({}, [
@@ -90,13 +88,12 @@ const getDashboard = async (req,res) => {
           },
         },
       ]);
-        console.log(result)
-
+        
         const data = await Order.aggregate([
             {
               $group: {
                 _id: '$date',
-                totalSales: { $sum: '$total' }
+                totalSales: { $sum: '$total' },
               }
             },
             {
@@ -104,34 +101,84 @@ const getDashboard = async (req,res) => {
             }
           ]);
           console.log(data)
-
           const weeklySales = await Order.aggregate([
             {
               $match: {
                 date: {
-                  $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
+                  $gte: new Date(new Date() - 7 * 7 * 24 * 60 * 60 * 1000)
                 }
               }
             },
             {
               $group: {
-                _id: { $week: { $toDate: "$date" } }, // Convert 'date' to a date object
+                _id: {
+                  week: { $isoWeek: "$date" },
+                  year: { $isoWeekYear: "$date" }
+                },
                 totalSales: { $sum: "$total" }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                week: "$_id.week",
+                year: "$_id.year",
+                totalSales: 1
               }
             }
           ]);
-          console.log(weeklySales)
-
+          
           const monthlySales = await Order.aggregate([
             {
               $group: {
                 _id: { $month: '$date' },
                 totalSales: { $sum: '$total' }
               }
+            },
+            {
+              $project: {
+                _id: 0,
+                month: {
+                  $switch: {
+                    branches: [
+                      { case: { $eq: ['$_id', 1] }, then: 'January' },
+                      { case: { $eq: ['$_id', 2] }, then: 'February' },
+                      { case: { $eq: ['$_id', 3] }, then: 'March' },
+                      { case: { $eq: ['$_id', 4] }, then: 'April' },
+                      { case: { $eq: ['$_id', 5] }, then: 'May' },
+                      { case: { $eq: ['$_id', 6] }, then: 'June' },
+                      { case: { $eq: ['$_id', 7] }, then: 'July' },
+                      { case: { $eq: ['$_id', 8] }, then: 'August' },
+                      { case: { $eq: ['$_id', 9] }, then: 'September' },
+                      { case: { $eq: ['$_id', 10] }, then: 'October' },
+                      { case: { $eq: ['$_id', 11] }, then: 'November' },
+                      { case: { $eq: ['$_id', 12] }, then: 'December' }
+                    ],
+                    default: 'Invalid Month'
+                  }
+                },
+                totalSales: 1
+              }
+            }
+
+          ]);
+          
+          const yearlySales = await Order.aggregate([
+            {
+              $group: {
+                _id: { $year: '$date' },
+                totalSales: { $sum: '$total' }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                year: '$_id',
+                totalSales: 1
+              }
             }
           ]);
-          console.log('monthly',monthlySales);
-        
+
           const totalSales = await Order.aggregate([
             {
               $group: {
@@ -140,7 +187,6 @@ const getDashboard = async (req,res) => {
               }
             }
           ]);
-        console.log(totalSales)
 
         const totalRevenue = await Order.aggregate([
             {
@@ -150,8 +196,32 @@ const getDashboard = async (req,res) => {
               }
             }
           ]);
-        console.log(totalRevenue)
-        res.render('admin/dashboard',{data: JSON.stringify(result),sales: JSON.stringify(totalSales),revenue: JSON.stringify(totalRevenue)})
+
+        const getTopProducts = await Order.aggregate([
+          {
+            $group: {
+              _id: '$proId',
+              productName: {$first: '$productname'},
+              totalQuantity: {$sum: '$quantity'},
+            }
+          },
+          {
+            $sort: {totalQuantity: -1},
+          },
+          {
+            $limit: 10
+          }
+        ]);
+        //console.log(getTopProducts)
+
+        const user = await User.countDocuments()
+        res.render('admin/dashboard',{data: JSON.stringify(result),sales: JSON.stringify(totalSales),revenue: JSON.stringify(totalRevenue),
+                                dailySales: JSON.stringify(data),
+                                top10: JSON.stringify(getTopProducts),
+                                weeklySales: JSON.stringify(weeklySales),
+                                monthlySales: JSON.stringify(monthlySales),
+                                yearlySales: JSON.stringify(yearlySales),
+                                count:JSON.stringify(user)})
     }catch(err){ 
         throw new Error(err.message)
     }
@@ -162,6 +232,7 @@ const getDashboard = async (req,res) => {
 /*.................................................product page...........................................*/
 const getProduct = async (req,res) => {
     try{
+
         var search = '';
         if(req.query.search){
                 search = req.query.search;
@@ -171,7 +242,6 @@ const getProduct = async (req,res) => {
                 page = req.query.page;
         }
 
-        
         const limit = 6;
         const products = await Product.find({
             list:true,
@@ -253,7 +323,45 @@ const getCategoryPage = async (req,res) => {
 /*................................................order page.................................................*/
 const getOrder = async (req,res) => {
     try{
-        const orders = await Order.find().sort({_id:-1}).lean()
+
+      var search = '';
+      if(req.query.search){
+              search = req.query.search;
+      }
+      var page = 1;
+      if(req.query.page){
+              page = req.query.page;
+      }
+      const limit = 6;
+
+        const orders = await Order.find({
+          $or:[
+            {paymentoption: {$regex:'.*'+search+'.*',$options:'i'} },
+            {status : {$regex: '.*'+search+'.*',$options:'i'} },
+        ]})
+        .limit( limit * 1 )
+        .skip( (page - 1) * limit )
+        .sort({_id:-1})
+        .lean()
+
+        const count = await Product.find({
+          $or:[
+              {paymentoption: {$regex:'.*'+search+'.*',$options:'i'} },
+              {status : {$regex: '.*'+search+'.*',$options:'i'} },
+          ]
+      }).countDocuments();
+
+      const totalPages = Math.ceil(count/limit);
+        const currentPage = page;
+
+        const pages = [];
+        for (let j = 1; j <= totalPages; j++) {
+            pages.push({
+                        pageNumber: j,
+                        isCurrent: j == currentPage,
+                        });
+                      }
+
         const groupedOrders = new Map();
 
         orders.forEach((order) => {
@@ -292,7 +400,7 @@ const getOrder = async (req,res) => {
         });
     });
     const combinedOrders = Array.from(groupedOrders.values());
-        res.render('admin/order',{combinedOrders})
+        res.render('admin/order',{combinedOrders,totalPages,currentPage,pages})
     }catch(err){
         throw new Error(err.message)
     }

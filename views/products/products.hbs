@@ -57,15 +57,27 @@
 
       <div class="col-xl-3" style="border-right: 1px solid grey;">
         <div class="filter">
-          <p style="font-size: 2rem;;">CATEGORIES</p>
+          <label for="price-range" style="font-size: 2rem;">Categories</label>
           <form>
             
              <label>
                 {{#each category}}
-                   <div> <p><input type="radio" name="color" value="red" >{{category}} </p></div>
+                   <div> <p><input type="checkbox" name="category[]" value="{{category}}" id="{{category}}" > {{ category}} </p></div>
                 {{/each}}
             </label>
-        
+            <br>
+          <label for="price-range" style="font-size: 2rem;">Price Range:</label>
+          <input type="range" id="price-range" name="priceRange" min="0" max="50000" step="10" value="{{priceRange}}">
+    
+        <br><br>
+         <label for="sort" style="font-size: 1.6rem;">Sort By:</label><br>
+        <select id="sort" name="sort">
+        <option value="highToLow" style="font-size: 1.6rem;">Price: High-Low</option>
+        <option value="lowToHigh" style="font-size: 1.6rem;">Price: Low-High</option>
+        </select>
+        <br><br><br> 
+
+        <button type="submit" style="background-color:#ffc107; border: none;font-size: 1.6rem; padding: 5%;">Apply Filters</button> 
         </form>
         </div>
       </div>
@@ -73,28 +85,26 @@
         <div class="row">
           <div class="col-xl-12">
             <div class="search">
-              <div class="form-group col-xs-9" style="display: flex; flex-direction:row;"> 
+              <div class="form-group col-xs-6" style="display: flex; flex-direction:row;"> 
                 <form>
                 <input  type="text" placeholder="Search" name="search" style="font-size:2rem;" />
                 <button type="submit" class="btn" value="search" style="">Search</button>
                 </form>
+                <br>
              </div>
-               <div class="form-group col-xs-3">  
-               
-              </div>
-            </div>
+           </div>
           </div>
         </div>
 
         <div class="row">
 
-          {{#each products}}
+          {{#each showproducts}}
 
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
               <div class="single-popular-items mb-50 text-center">
                 <div class="popular-img">
                   <a href="/productdetails/{{this._id}}"><img
-                      src="/images/{{this.image}}"
+                      src="/images/products/{{this.image}}"
                       alt="product image"
                       style="max-width: 80%;object-fit:contain;"
                     /></a>

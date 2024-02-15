@@ -18,49 +18,6 @@ font-size: 1.6rem;
  <!-- 
   <section class="checkout_area section_padding">-->
           <div class="container">
-           {{!-- <div class="returning_customer">
-              <div class="check_title">
-                <h2>
-                  Returning Customer?
-                  <a href="#">Click here to login</a>
-                </h2>***
-              </div>
-              <p>
-                If you have shopped with us before, please enter your details in the
-                boxes below. If you are a new customer, please proceed to the
-                Billing & Shipping section.
-              </p>
-              <form class="row contact_form" action="#" method="post" novalidate="novalidate">
-                <div class="col-md-6 form-group p_star">
-                  <input type="text" class="form-control" id="name" name="name" value=" " />
-                  <span class="placeholder" data-placeholder="Username or Email"></span>
-                </div>
-                <div class="col-md-6 form-group p_star">
-                  <input type="password" class="form-control" id="password" name="password" value="" />
-                  <span class="placeholder" data-placeholder="Password"></span>
-                </div>
-                <div class="col-md-12 form-group">
-                  <button type="submit" value="submit" class="btn_3">
-                    log in
-                  </button>
-                  <div class="creat_account">
-                    <input type="checkbox" id="f-option" name="selector" />
-                    <label for="f-option">Remember me</label>
-                  </div>
-                  <a class="lost_pass" href="#">Lost your password?</a>
-                </div>
-              </form>
-            </div>
-            <div class="cupon_area">
-              <div class="check_title">
-                <h2>
-                  Have a coupon?
-                  <a href="#">Click here to enter your code</a>
-                </h2>
-              </div>
-              <input type="text" placeholder="Enter coupon code" />
-              <a class="tp_btn" href="#">Apply Coupon</a>
-            </div> --}}
             <div class="billing_details">
               <div class="row">
                 <div class="col-lg-8">
@@ -70,7 +27,7 @@ font-size: 1.6rem;
                     <a style="margin-bottom: 20px; font-size:1.5rem;" class="btn_3 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                      Select Address
                     </a>
-
+                    
                      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     <a class="dropdown-item" href="/showaddress?type=home">Home</a>
                     <a class="dropdown-item" href="/showaddress?type=work">Work</a>
@@ -198,6 +155,7 @@ font-size: 1.6rem;
                       <div class="order_box">
                       {{!-- <div class="creat_account"> --}}
                         <h3>Payment Options</h3>
+                        {{#if error}} <span class="text-danger" style="font-size: 1.6rem;">{{error}}</span> {{/if}}
                         <hr>
                       <div style="display: flex; justify-content:space-around; font-size:1.6rem">
                       <label for="cashondelivery"><input type="radio" id="cashondelivery" name="paymentOption" value="COD" /> Cash On Delivery</label>
@@ -205,13 +163,11 @@ font-size: 1.6rem;
                       <label for="onlinepayment"><input type="radio" id="razorpay" name="paymentOption" value="Razorpay" /> Online Payment</label>
                       <div style="display: flex; justify-content: center; margin-top: 20px;">
       
-   </div>
+                      </div>
                         </div>
                       </div>
                       <div style="display: flex; justify-content: center; margin-top: 20px;">
                        <button class="btn_3" type="button" onclick="submitOrder()">Place Order</button>
-                      {{!-- <textarea class="form-control form-control-lg" name="message" id="message" rows="1"
-                        placeholder="Order Notes"></textarea> --}}
                     </div>
                       </div>
                   
@@ -229,7 +185,7 @@ font-size: 1.6rem;
                       </li>
                       {{#each cartData}}
                       <li>
-                       <a href="/productdetails/{{this.proId}}"><img src="/images/{{this.product.image}}" style="width: 50px;height:50px;">
+                       <a href="/productdetails/{{this.proId}}"><img src="/images/products/{{this.product.image}}" style="width: 50px;height:50px;">
                         {{this.product.productname}} x {{quantity}}</a>
             
                         </a>
@@ -254,17 +210,41 @@ font-size: 1.6rem;
                       </li>
                       <li>
                         <a href="#">Total
-                          <span>{{total}}</span>
+                          <span id="total">{{total}}</span>
                         </a>
-                      </li>
+                      </li> 
                        <div class="cupon_area">
               <div class="check_title">
                 <h2>
-                  Have a coupon?
+                  Available coupon?
                 </h2>
               </div>
-              <input style="font-size:1.6rem; margin-left:0px;" type="text" placeholder="Enter coupon code" />
-              <a class="tp_btn" href="#">Apply Coupon</a>
+              {{#each coupons}}
+              {{!-- <form action="/checkcoupon?id={{this._id}}" class="form-inline" method="post">
+                <div class="form-row">
+                <div class="form-group ">
+              <input style="font-size:1.6rem; margin-left:0px;" type="text" value="{{this.code}}"/>
+              <button>Apply Coupon</button>
+                </div>
+                </div>
+              </form> --}}
+       
+ 
+            <div style="width: 100%;display: flex;margin-top: 5px;">
+
+                    <input type="text" disabled value="{{this.code}}" style="background-color: white;font-size: 1.6rem; margin: 0px;border-radius: 5px;box-shadow: 1px 1px 5px black;" id="couponCode">
+                  <button onclick="applyCoupon('{{this.discount}}','{{this._id}}')" style="background-color: #0B1C39; width: 100px;height: 40px;border-radius: 5px;font-size: 18px;">Apply</button>
+            </div>
+                   
+
+
+              
+  
+     
+ 
+
+
+              {{/each}}
             </div> 
                     </ul>
                     </ul>
@@ -312,5 +292,18 @@ font-size: 1.6rem;
     form.submit();
     }
 
-  </script>   
+  </script> 
+
+  <script>
+    function applyCoupon(discount,id){
+
+ const total =parseInt( document.getElementById("total").innerHTML)
+ console.log(total)
+      {{!-- const discount = parseInt(discount);
+      const discountedPrice = (total*discount)/100;
+ document.getElementById("total").innerHTML = total - discountedPrice  --}}
+     
+
+    }
+  </script>  
  </body>

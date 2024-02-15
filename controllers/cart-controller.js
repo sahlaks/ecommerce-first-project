@@ -7,7 +7,8 @@ const Address = require('../models/addressmodel');
 const Wallet = require('../models/walletmodel')
 const { default: mongoose, SchemaType } = require("mongoose");
 const Order = require("../models/ordermodel");
-const Razorpay = require('razorpay')
+const Razorpay = require('razorpay');
+const Coupon = require("../models/couponModel");
 require('dotenv').config();
 
 
@@ -180,7 +181,7 @@ const updateCart = async (req,res) => {
         
         const cart = await Cart.findOne({userId});
         const existpro = cart.products.find(p => p.proId == pId)
-        console.log(existpro)
+        //console.log(existpro)
         if(existpro){
             if(count == -1 && existpro.quantity == 1){
 
@@ -318,8 +319,8 @@ const deleteWishlist = async (req,res) => {
 const checkout = async (req,res) => {
     try{
         const userId = req.session.uid;
-        console.log('_id',userId)
-
+        const error = req.query.error
+       // console.log('_id',userId)
        // const cart = await Cart.findOne({userId})
     
         const result = await Cart.aggregate([
@@ -414,8 +415,10 @@ const checkout = async (req,res) => {
           }
 
         ])
-        console.log(sum)
+        console.log('sum is ' , sum)
         const { subtotal,discount,total } = sum[0]
+        const coupons = await Coupon.find({minAmount : {$lte: total}}).lean()
+        console.log(coupons)
         let user = await Address.findOne({userId})
        console.log('user address',user)
     if(user){
@@ -437,15 +440,15 @@ const checkout = async (req,res) => {
             var addr;
             addr = address[0].addresses;
             req.session.checkoutaddress = addr;
-            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr,coupons,error});
             }
         else {
             var addr = null;
-            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+            res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr,coupons,error});
             }
     }else{
         var addr = null;
-        res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr});
+        res.render('products/checkout', {user: true,cartData: result,subtotal,discount,total,addr,coupons,error});
     }
     }catch(err){
         throw new Error(err.message)
@@ -461,7 +464,6 @@ const takeAddress = async (req,res) => {
     console.log(userId)
     console.log(type)
     try{
-    let user = await Address.findOne({userId})
     
         var result = await Cart.aggregate([
             { $match: { userId: userId } },
@@ -556,8 +558,12 @@ const takeAddress = async (req,res) => {
 
         ])
 
-        console.log(sum)
+        //console.log(sum)
         const { subtotal,discount,total } = sum[0]
+        const coupons = await Coupon.find({minAmount : {$lte: total}}).lean()
+        console.log(coupons)
+
+        let user = await Address.findOne({userId})
         if(user){
             const address = await Address.aggregate([
                 {$match: {
@@ -574,13 +580,20 @@ const takeAddress = async (req,res) => {
                 }
                 ])
                 //console.log(address)
+                if(address.length > 0 ){
                 var addr;
                 addr = (address[0].addresses);
-
-        res.render('products/checkout',{user:true,addr,cartData: result,subtotal,discount,total})
-    }else{
-        res.render('products/checkout',{user:true,addr, cartData: result, subtotal,discount,total})
-    }
+                res.render('products/checkout',{user:true,addr,cartData: result,subtotal,discount,total,coupons})
+                }
+                else{
+                var addr = null;
+                res.render('products/checkout',{user:true,type,addr, cartData: result, subtotal,discount,total,coupons})
+                }
+            }
+            else{
+                console.log('user not exist')
+                res.render('products/checkout',{user:true,cartData: result,subtotal,discount,total,coupons})
+            }
     }catch(err){    
         throw new Error(err.message)
     }
@@ -590,12 +603,31 @@ const takeAddress = async (req,res) => {
 
 /*..........................................from checkout..................................................*/
 const checkoutForm = async (req,res) => {
-    //console.log('hi in new route');
+    console.log('hi in new route');
    // console.log(req.body);
     const userId = req.session.uid;
     let typeaddr = req.session.type;
     const formData = req.body;
-    console.log(formData)
+    console.log('in checkout ',formData)
+    const user = await Address.findOne({userId});
+    if(user){
+        const addr = await Address.findOne({userId, 'addresses.type' : typeaddr})
+        console.log(addr)
+        if(!addr){
+        user.addresses.push({
+            fname: formData.fname,
+            sname: formData.sname,
+            address: formData.address,
+            locality: formData.locality,
+            district: formData.district,
+            pincode: formData.pincode,
+            mobilenumber: formData.mobilenumber,
+            email: formData.email,
+            type: typeaddr,
+        });
+        await user.save();
+            }
+    }else{
     const newAddress = new Address({
             userId:userId,
             addresses:[{
@@ -611,6 +643,7 @@ const checkoutForm = async (req,res) => {
             }]
         })
         await newAddress.save();
+    }
         // user.addresses.push(newAddress);
         // addr = await user.save();
         // console.log(addr)
@@ -653,8 +686,8 @@ const checkoutForm = async (req,res) => {
                },
           },
         ])
-    console.log(result)
-    console.log('in',)
+    //console.log(result)
+    //console.log('in',)
     const sum = await Cart.aggregate([
         { $match: { userId: userId } },
         {
@@ -739,11 +772,31 @@ const checkoutForm = async (req,res) => {
     })
         // await orderlist.save();
         const newOrder = await Order.create(orderlists);
-        console.log(newOrder)
+       console.log(newOrder)
 
-    if (selectedPaymentOption === 'COD') {
-       await Cart.deleteOne({_id:req.session.cartid})
-        res.render('products/cod-success',{user:true,formData,subtotal,discount,total})
+    if (total > 1000 && selectedPaymentOption === 'COD') {
+        res.redirect('/checkout?error=COD+not+allowed+for+orders+above+1000')
+        }
+    else if (selectedPaymentOption === 'COD') {
+        await Cart.deleteOne({_id:req.session.cartid})
+        const data = await Order.find({cartid:req.session.cartid})
+        // console.log(data[0].proId)
+        await Promise.all(
+            data.map(async (order) => {
+              try {
+                const product = await Product.findOne({ _id: order.proId });
+                if (product && product.quantity >= order.quantity) {
+                    product.quantity -= order.quantity;
+                    await product.save();
+                } else {
+                    console.error(`Insufficient quantity or product not found for proId: ${order.proId}`);
+                }
+            } catch (error) {
+                console.error(`Error updating product quantity for proId ${order.proId}: ${error}`);
+            }
+            })
+        )
+       res.render('products/cod-success',{user:true,formData,subtotal,discount,total})
     }
     else if(selectedPaymentOption === 'Razorpay') {
         //var addr =  req.session.checkoutaddress;
@@ -759,7 +812,8 @@ const checkoutForm = async (req,res) => {
        res.render('products/success',{keyId:process.env.RAZORPAY_KEY_ID,razorpayOrder,formData,subtotal,discount,total})
     }
     else if(selectedPaymentOption === 'Wallet'){
-
+        await Cart.deleteOne({_id:req.session.cartid})
+        res.render('products/wallet-success',{user:true})
     }
 
     }catch(err){
@@ -770,11 +824,9 @@ const checkoutForm = async (req,res) => {
 /*.............................................razorpay validate......................................*/
 const razorpayChecking = async (req,res)=>{
     try{
-    //console.log(req.body)
+    
     var crypto = require('crypto')
     var razorpaysecret = process.env.RAZORPAY_SECRET_KEY;
-    // console.log(razorpaysecret)
-    // console.log(req.session.razorid)
     var hmac = crypto.createHmac("sha256",razorpaysecret)
     hmac.update(req.session.razorid + "|" + req.body.razorpay_payment_id);
     hmac = hmac.digest("hex");
@@ -783,10 +835,27 @@ const razorpayChecking = async (req,res)=>{
     
         console.log("payment successful");
         await Cart.deleteOne({_id:req.session.cartid})
+        const data = await Order.find({cartid:req.session.cartid})
+        await Promise.all(
+            data.map(async (order) => {
+              try {
+                const product = await Product.findOne({ _id: order.proId });
+                if (product && product.quantity >= order.quantity) {
+                    product.quantity -= order.quantity;
+                    await product.save();
+                } else {
+                    console.error(`Insufficient quantity or product not found for proId: ${order.proId}`);
+                }
+            } catch (error) {
+                console.error(`Error updating product quantity for proId ${order.proId}: ${error}`);
+            }
+            })
+        )
+
         res.render('products/razorpaysuccess',{user:true})
     }else{
-        console.log("payment not successfull")
         await Order.deleteMany({cartid:req.session.cartid})
+        console.log("payment not successfull")
         res.send('payment failed')
     }
 }catch(error){
@@ -796,7 +865,7 @@ const razorpayChecking = async (req,res)=>{
 } 
 
 
-/*..............................view order.........................................*/
+/*.............................................view order............................................*/
 const viewOrder = async (req,res) => {
     try{
         const user = req.session.uid;
@@ -851,11 +920,12 @@ const viewOrder = async (req,res) => {
     }
 }
 
+/*......................................view order details and change status.......................................*/
 const viewOrderList = async (req,res) => {
-        const orderId = req.params.oid;
+        const orderId = req.query.oid;
+        const msg = req.query.message;
     try{
         const orders = await Order.find({cartid:orderId}).lean()
-        console.log(orders)
         const groupedOrders = new Map();
 
         orders.forEach((order) => {
@@ -895,73 +965,180 @@ const viewOrderList = async (req,res) => {
         });
     });
     const combinedOrders = Array.from(groupedOrders.values());
-    console.log(combinedOrders)
-    var value = combinedOrders[0].status;
-
-    let resultplaced = false;
-    let resultshipped = false;
-    let resultdelivered = false;
-    let result = false;
-
-    if(value === 'Placed'){
-       resultplaced = true;
-    }else if(value === 'Shipped'){
-        resultshipped = true;
-    }else if(value === 'Delivered'){
-       resultdelivered = true;
-    }else{
-        result = true;
-    }
-
-    console.log(resultplaced,resultshipped,resultdelivered,result)
-    res.render('products/vieworder',{user:true,combinedOrders,orderId})
+    //console.log(combinedOrders)
+    res.render('products/vieworder',{user:true,combinedOrders,orderId,msg})
     
     }catch(err){
         throw new Error(err.message)
     }
 }
 
-
-
+/*..............................................cancel order.....................................................*/
 const cancelOrder = async (req,res) => {
     try{
         const orderid = req.query.oid;
-        console.log("cartid ",orderid);
+        //console.log("cartid ",orderid);
         const order = await Order.updateMany({cartid: orderid},{$set:{status:'Cancelled'}});
-        console.log(order)
+        //console.log(order)
+        const data = await Order.find({cartid:orderid})
+        await Promise.all(
+            data.map(async (order) => {
+              try {
+                const product = await Product.findOne({ _id: order.proId });
+                if (product) {
+                    product.quantity += order.quantity;
+                    await product.save();
+                } else {
+                    console.error(`product not found for proId: ${order.proId}`);
+                }
+            } catch (error) {
+                console.error(`Error updating product quantity for proId ${order.proId}: ${error}`);
+            }
+            })
+        )
+
         res.render('products/cancelorder',{user:true})
     }catch(err){
         throw new Error(err.message)
     }
 }
 
+/*.........................................return order and update wallet..................................................*/
 const returnOrder = async (req,res) => {
     try{
         const orderid = req.query.oid;
         const order = await Order.updateMany({cartid: orderid},{$set:{status:'Returned'}});
         const user = await Order.findOne({cartid:orderid});
-        console.log(user);
+        //console.log(user);
         const id = user.userId;
         const sum = user.total;
-        const wallet = await Wallet.findOne({userId:id})
-        if(wallet){
-            Wallet.updateOne({userId:id},{$inc:{amount:total}})
-        }
-        res.render('products/returnorder',{user:true,id,sum})
+        
+        const newWallet = new Wallet({
+                userId:id,
+                amount:sum,
+                orderId:orderid,
+            })
+        
+        await newWallet.save()
+
+        const data = await Order.find({cartid:orderid})
+        await Promise.all(
+            data.map(async (order) => {
+              try {
+                const product = await Product.findOne({ _id: order.proId });
+                if (product) {
+                    product.quantity += order.quantity;
+                    await product.save();
+                } else {
+                    console.error(`product not found for proId: ${order.proId}`);
+                }
+            } catch (error) {
+                console.error(`Error updating product quantity for proId ${order.proId}: ${error}`);
+            }
+            })
+        )
+
+        res.render('products/returnorder',{user:true,id})
+
     }catch(err){
         throw new Error(err.message)
     }
 }
 
+/*...................................................view wallet.........................................................................*/
 const viewWallet = async (req,res) => {
     try{
-        console.log(req.body.id)
-        console.log(req.body.sum)
+        const user = req.session.uid;
+        const details = await Wallet.find({userId:user}).sort({_id:1}).lean()
+        //console.log(details)
+    
+        const totalamount = await Wallet.aggregate([
+            {$match:{
+                userId:user,
+            } 
+            },
+            {$group:{
+                _id:null,
+                total:{$sum: "$amount"}
+                }
+            }
+        ])
+        //var total = totalamount[0].total
+        const total = totalamount.length > 0 ? totalamount[0].total : 0;
+        //console.log(totalamount)
+        res.render('user/wallet',{user:true,details,total})
+
     }catch(err){
         throw new Error(err.message);
     }
 }
 
+var easyinvoice = require('easyinvoice');
+var fs = require('fs');
+const viewInvoice = async (req,res) => {
+    try{
+        const cartId = req.query.cid;
+        var data = {
+
+            // Let's add a recipient
+            "client": {
+                "company": "Client Corp",
+                "address": "Clientstreet 456",
+                "zip": "4567 CD",
+                "city": "Clientcity",
+                "country": "Clientcountry"
+            },
+        
+            // Now let's add our own sender details
+            "sender": {
+                "company": "Sample Corp",
+                "address": "Sample Street 123",
+                "zip": "1234 AB",
+                "city": "Sampletown",
+                "country": "Samplecountry"
+            },
+            "images": {
+                logo: "https://public.easyinvoice.cloud/img/logo_en_original.png",
+            },
+            "information": {
+                // Invoice number
+                "number": "2021.0001",
+                // Invoice data
+                "date": "12-12-2021",
+                // Invoice due date
+                "due-date": "31-12-2021"
+            },
+            "products": [
+                {
+                    "quantity": "2",
+                    "description": "Test1",
+                    "tax-rate": 6,
+                    "price": 33.87
+                },
+                {
+                    "quantity": "4",
+                    "description": "Test2",
+                    "tax-rate": 21,
+                    "price": 10.45
+                }
+            ],
+            "bottomNotice": "Kindly pay your invoice within 15 days.",
+            "settings": {
+                "currency": "USD",
+            },
+            "translate": {
+            },
+            "customize": {
+            },
+        };
+        easyinvoice.createInvoice(data, function (result) {
+            fs.writeFileSync("invoice.pdf", result.pdf, 'base64');
+        });
+        res.redirect(`/editorder?oid=${cartId}&message=Invoice+dowloaded`)
+    }catch(err){
+        throw new Error(err.message)
+    }
+}
 module.exports = {
                 addCart,
                 cart,
@@ -978,5 +1155,6 @@ module.exports = {
                 cancelOrder,
                 razorpayChecking,
                 returnOrder,
-                viewWallet
+                viewWallet,
+                viewInvoice
                 }

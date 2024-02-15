@@ -1,8 +1,9 @@
 const express = require('express');
-const { signupGetController, createUser, userLogin, userIn, homeRoute, checkOtp, forgotPass, verifyMail, failOtp, sendOtp, getOtp, reSendOtp, resetPwd, reSet, contactControler, contactController, aboutController, signout, profile, address, editProfile, addAddress, addaddress, deleteAddress, changepwd, editAddress, updateAddress, changepassword } = require('../controllers/user-controller');
+const { signupGetController, createUser, userLogin, userIn, homeRoute, checkOtp, forgotPass, verifyMail, failOtp, sendOtp, getOtp, reSendOtp, resetPwd, reSet, contactController, aboutController, signout, profile, address, editProfile, addAddress, addaddress, deleteAddress, changepwd, editAddress, updateAddress, changepassword } = require('../controllers/user-controller');
 const { validationRules, checkValidation, verifyLogin, pwdValidation, resetPwdRules, changepwdRules, changepwdValidation, addressValidation, addressRules } = require('../middlewares/middlewares');
 const { products, productDetails} = require('../controllers/product-controller');
-const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder, razorpayChecking, fetchStatus, returnOrder, updateWallet} = require('../controllers/cart-controller');
+const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder, razorpayChecking, returnOrder, viewWallet, viewInvoice} = require('../controllers/cart-controller');
+const { getCoupons, checkCoupon } = require('../controllers/couponController');
 const app = express.Router();
 
 
@@ -70,14 +71,20 @@ app.get('/showaddress',verifyLogin,takeAddress)
 app.post('/postcheckout',verifyLogin,checkoutForm)
 app.post('/razorpay/callback',razorpayChecking);
 app.get('/vieworder',verifyLogin,viewOrder)
-app.get('/editorder/:oid',verifyLogin,viewOrderList)
+app.get('/editorder',verifyLogin,viewOrderList)
 app.get('/cancelorder',verifyLogin,cancelOrder)
 app.get('/returnorder',verifyLogin,returnOrder)
-app.post('/wallet',updateWallet)
+app.get('/wallet',verifyLogin,viewWallet)
 
 /*................................................profile...........................................................*/
 app.get('/profile',verifyLogin,profile)
-app.get('/editprofile',editProfile)
+app.post('/editprofile',verifyLogin,editProfile)
+
+
+/*...............................................Coupons...........................................................*/
+app.get('/getcoupon',verifyLogin,getCoupons)
+app.post('/checkcoupon',verifyLogin,checkCoupon)
+app.get('/invoice',viewInvoice)
 
 /*................................................address..........................................................*/
 app.get('/address',verifyLogin,address)

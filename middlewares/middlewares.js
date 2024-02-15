@@ -267,7 +267,7 @@ const addressRules = [
 
     check('mobilenumber')
     .not().isEmpty().withMessage('Mobilenumber should not be empty')
-    .isLength({min:12,max:12}).withMessage('Mobilenumber must be 12 digits'),
+    .isLength({min:10,max:10}).withMessage('Mobilenumber must be 10 digits'),
 
     check('type').isIn(['home', 'work']).withMessage('Invalid radio button value')
 ]
@@ -314,14 +314,13 @@ const productImgResize = async (req, res, next) => {
 
   const productImgResizeSingle = async (req, res, next) => {
     try {
-        // Check if req.file is present (single file upload)
         if (!req.file) {
             throw new Error('No file found in the request.');
         }
 
         const file = req.file;
         console.log(file.path)
-        // Process the single file
+
         let sharpInstance = sharp(file.path);
 
         await sharpInstance
@@ -331,7 +330,6 @@ const productImgResize = async (req, res, next) => {
 
         sharpInstance.destroy();
 
-        // Delete the original uploaded file
         await fs.promises.unlink(file.path);
         console.log(`File ${file.filename} resized and deleted successfully.`);
     } catch (error) {

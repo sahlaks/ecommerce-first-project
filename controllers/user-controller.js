@@ -153,7 +153,7 @@ const getOtp = (req,res) => {
 }
 
 const checkOtp = async (req,res) => {
-    
+try{
     if(req.session.otp == req.body.otp){
         if(req.session.forgotpwd == true){
             //res.send('success')
@@ -162,13 +162,18 @@ const checkOtp = async (req,res) => {
             else{
 
                 const user = await User.create(req.session.data)
+                console.log(user)
+                req.session.uid = user._id;
                 res.redirect('home');
             }
         }   
         else{
             res.render('user/otpfail')
         }
-
+}catch(err){
+    throw new Error(err.message)
+    //res.status(500).send('Internal Server Error');
+}
 
 }
 
@@ -179,11 +184,15 @@ const resetPwd = (req,res) =>{
 }
 
 const reSet = async (req,res) => {
+    try{
     const hashPassword = await bcrypt.hash(req.body.password,10)
     req.body.password = hashPassword;
     const val = await User.updateOne({email:req.session.email},{$set: {password:req.body.password}})
     
     res.redirect('home')
+    }catch(err){
+        throw new Error(err.message)
+    }
 }
 
 /*.....................................................OTP failure.....................................................................*/
@@ -266,9 +275,13 @@ const address = async (req,res) => {
                                     /*.......show address........*/
 const addaddress = async (req,res) => {
     const userId = req.session.uid;
+    try{
     const user1 = await User.findOne({_id : userId}).lean()
     //console.log(user1)
     res.render('user/addaddress',{user:true,user1})
+    }catch(err){
+        throw new Error(err.message)
+    }
 }
                                     /*.......add address........*/
 const addAddress = async (req,res) => {
