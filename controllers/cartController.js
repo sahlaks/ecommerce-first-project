@@ -1,14 +1,16 @@
-const Product = require("../models/productmodel")
-const User = require("../models/usermodel");
-const Category = require('../models/categorymodel');
-const Cart = require('../models/cartmodel');
-const Wishlist = require('../models/wishlistmodel');
-const Address = require('../models/addressmodel');
-const Wallet = require('../models/walletmodel')
+const Product = require("../models/productModel")
+const User = require("../models/userModel");
+const Category = require('../models/categoryModel');
+const Cart = require('../models/cartModel');
+const Wishlist = require('../models/wishlistModel');
+const Address = require('../models/addressModel');
+const Wallet = require('../models/walletModel')
 const { default: mongoose, SchemaType } = require("mongoose");
-const Order = require("../models/ordermodel");
+const Order = require("../models/orderModel");
 const Razorpay = require('razorpay');
 const Coupon = require("../models/couponModel");
+var easyinvoice = require('easyinvoice');
+var fs = require('fs');
 require('dotenv').config();
 
 
@@ -25,10 +27,6 @@ const raz = new Razorpay({
                                                 /*....update database....*/
 const addCart = async (req,res) => {
     try{
-
-        //console.log(req.session.uid)
-       // console.log(req.params.pid)
-        
         const userId = req.session.uid;
         const pId = req.params.pid;
 
@@ -104,7 +102,6 @@ const cart = async (req,res) => {
                },
           },
         ])
-       // console.log(result)
         const sum = await Cart.aggregate([
             { $match: { userId: userId } },
             {
@@ -159,11 +156,7 @@ const cart = async (req,res) => {
           }
 
         ])
-        //console.log(sum)
        const { subtotal,discount,total } = sum[0]
-       //console.log(subtotal)
-       //console.log(discount)
-       //console.log(total)
         res.render('products/cart',{user:true, cartData: result, subtotal,discount,total})
     }
         }catch(err){
@@ -181,7 +174,6 @@ const updateCart = async (req,res) => {
         
         const cart = await Cart.findOne({userId});
         const existpro = cart.products.find(p => p.proId == pId)
-        //console.log(existpro)
         if(existpro){
             if(count == -1 && existpro.quantity == 1){
 
@@ -202,7 +194,6 @@ const updateCart = async (req,res) => {
 const deleteCart = async (req,res) => {
     const userId = req.session.uid;
     const pId = req.params.productId;
-    //console.log(pId)
     try {
       const user = await Cart.findOne({userId});
       const existpro = user.products.find(p => p.proId == pId)
@@ -320,9 +311,6 @@ const checkout = async (req,res) => {
     try{
         const userId = req.session.uid;
         const error = req.query.error
-       // console.log('_id',userId)
-       // const cart = await Cart.findOne({userId})
-    
         const result = await Cart.aggregate([
             { $match: { userId: userId } },
             {
@@ -415,9 +403,17 @@ const checkout = async (req,res) => {
           }
 
         ])
-        console.log('sum is ' , sum)
         const { subtotal,discount,total } = sum[0]
-        const coupons = await Coupon.find({minAmount : {$lte: total}}).lean()
+        const coupons = await Coupon.aggregate([{$match:{minAmount : {$lte: total}}},{
+            $match:{'users':{
+                $not:{
+                    $elemMatch:{
+                        $eq:req.session.uid
+                    }
+                }
+            }}
+        }])
+       
         console.log(coupons)
         let user = await Address.findOne({userId})
        console.log('user address',user)
@@ -501,8 +497,6 @@ const takeAddress = async (req,res) => {
                },
           },
         ])
-       
-      
         const sum = await Cart.aggregate([
             { $match: { userId: userId } },
             {
@@ -557,12 +551,9 @@ const takeAddress = async (req,res) => {
           }
 
         ])
-
-        //console.log(sum)
         const { subtotal,discount,total } = sum[0]
+        //coupons
         const coupons = await Coupon.find({minAmount : {$lte: total}}).lean()
-        console.log(coupons)
-
         let user = await Address.findOne({userId})
         if(user){
             const address = await Address.aggregate([
@@ -579,7 +570,6 @@ const takeAddress = async (req,res) => {
                     }
                 }
                 ])
-                //console.log(address)
                 if(address.length > 0 ){
                 var addr;
                 addr = (address[0].addresses);
@@ -603,16 +593,13 @@ const takeAddress = async (req,res) => {
 
 /*..........................................from checkout..................................................*/
 const checkoutForm = async (req,res) => {
-    console.log('hi in new route');
-   // console.log(req.body);
     const userId = req.session.uid;
     let typeaddr = req.session.type;
     const formData = req.body;
-    console.log('in checkout ',formData)
     const user = await Address.findOne({userId});
     if(user){
         const addr = await Address.findOne({userId, 'addresses.type' : typeaddr})
-        console.log(addr)
+       // console.log(addr)
         if(!addr){
         user.addresses.push({
             fname: formData.fname,
@@ -644,9 +631,6 @@ const checkoutForm = async (req,res) => {
         })
         await newAddress.save();
     }
-        // user.addresses.push(newAddress);
-        // addr = await user.save();
-        // console.log(addr)
     const selectedPaymentOption = formData.paymentOption;
     try{
         
@@ -686,8 +670,6 @@ const checkoutForm = async (req,res) => {
                },
           },
         ])
-    //console.log(result)
-    //console.log('in',)
     const sum = await Cart.aggregate([
         { $match: { userId: userId } },
         {
@@ -742,8 +724,6 @@ const checkoutForm = async (req,res) => {
       }
     ])
     const { subtotal,discount,total } = sum[0]
-    console.log(subtotal,discount,total)
-    
     const orderlists = result.map((item) => {
         return new Order({
             userId: userId,
@@ -767,12 +747,9 @@ const checkoutForm = async (req,res) => {
             subtotal:subtotal,
             discount:discount,
             total:total,
-        })
-        
+        }) 
     })
-        // await orderlist.save();
-        const newOrder = await Order.create(orderlists);
-       console.log(newOrder)
+    const newOrder = await Order.create(orderlists);
 
     if (total > 1000 && selectedPaymentOption === 'COD') {
         res.redirect('/checkout?error=COD+not+allowed+for+orders+above+1000')
@@ -780,7 +757,7 @@ const checkoutForm = async (req,res) => {
     else if (selectedPaymentOption === 'COD') {
         await Cart.deleteOne({_id:req.session.cartid})
         const data = await Order.find({cartid:req.session.cartid})
-        // console.log(data[0].proId)
+        await Order.updateMany({cartid:req.session.cartid},{$set : {payment:'Success'}})
         await Promise.all(
             data.map(async (order) => {
               try {
@@ -812,8 +789,19 @@ const checkoutForm = async (req,res) => {
        res.render('products/success',{keyId:process.env.RAZORPAY_KEY_ID,razorpayOrder,formData,subtotal,discount,total})
     }
     else if(selectedPaymentOption === 'Wallet'){
-        await Cart.deleteOne({_id:req.session.cartid})
-        res.render('products/wallet-success',{user:true})
+        const data = await Wallet.find({userId:req.session.uid})
+        var totalAmount = data[0].total;
+        if(total > totalAmount){
+            res.redirect('/checkout?error=There+is+no+sufficient+amount+in+wallet!')
+            }
+        else{
+            totalAmount -= total;
+            await Cart.deleteOne({_id:req.session.cartid})
+            req.session.walletAmount = totalAmount;
+            await Wallet.updateMany({userId:req.session.uid},{$set: {total: totalAmount}})
+            await Order.updateMany({cartid:req.session.cartid},{$set : {payment:'Success'}})
+            res.render('products/wallet-success',{user:true})
+            }
     }
 
     }catch(err){
@@ -824,7 +812,7 @@ const checkoutForm = async (req,res) => {
 /*.............................................razorpay validate......................................*/
 const razorpayChecking = async (req,res)=>{
     try{
-    
+
     var crypto = require('crypto')
     var razorpaysecret = process.env.RAZORPAY_SECRET_KEY;
     var hmac = crypto.createHmac("sha256",razorpaysecret)
@@ -836,6 +824,7 @@ const razorpayChecking = async (req,res)=>{
         console.log("payment successful");
         await Cart.deleteOne({_id:req.session.cartid})
         const data = await Order.find({cartid:req.session.cartid})
+        await Order.updateMany({cartid:req.session.cartid},{$set : {payment:'Success'}})
         await Promise.all(
             data.map(async (order) => {
               try {
@@ -859,7 +848,12 @@ const razorpayChecking = async (req,res)=>{
         res.send('payment failed')
     }
 }catch(error){
-    res.status(500).send('Something went wrong').json({err:error.message})
+   // res.status(500).send('Something went wrong').json({err:error.message})
+   res.status(500).json({
+    success: false,
+    message: 'Payment processing failed',
+    error: error.message,
+});
 }
 
 } 
@@ -870,9 +864,6 @@ const viewOrder = async (req,res) => {
     try{
         const user = req.session.uid;
         const orders = await Order.find({userId:user}).sort({_id:-1}).lean()
-        //console.log(orderItems)
-        //order.forEach(item)
-        //console.log(orderItems.products.proId)
         const groupedOrders = new Map();
 
     orders.forEach((order) => {
@@ -965,7 +956,7 @@ const viewOrderList = async (req,res) => {
         });
     });
     const combinedOrders = Array.from(groupedOrders.values());
-    //console.log(combinedOrders)
+    console.log(combinedOrders)
     res.render('products/vieworder',{user:true,combinedOrders,orderId,msg})
     
     }catch(err){
@@ -977,9 +968,7 @@ const viewOrderList = async (req,res) => {
 const cancelOrder = async (req,res) => {
     try{
         const orderid = req.query.oid;
-        //console.log("cartid ",orderid);
         const order = await Order.updateMany({cartid: orderid},{$set:{status:'Cancelled'}});
-        //console.log(order)
         const data = await Order.find({cartid:orderid})
         await Promise.all(
             data.map(async (order) => {
@@ -1009,18 +998,27 @@ const returnOrder = async (req,res) => {
         const orderid = req.query.oid;
         const order = await Order.updateMany({cartid: orderid},{$set:{status:'Returned'}});
         const user = await Order.findOne({cartid:orderid});
-        //console.log(user);
-        const id = user.userId;
-        const sum = user.total;
         
+        const id = user.userId;
+        var sum = user.total;
+        var total = 0; 
+        total += sum;
         const newWallet = new Wallet({
-                userId:id,
+                userId:req.session.uid,
                 amount:sum,
                 orderId:orderid,
+                total : 0,
             })
         
         await newWallet.save()
 
+        const totalAmount = await Wallet.aggregate([
+                {$match:{userId:id}},
+                { $group: { _id: null, total: { $sum: '$amount' } } }
+            ])
+            const result = totalAmount.length > 0 ? totalAmount[0].total : 0;    
+            req.session.walletAmount = result;
+            await Wallet.updateMany({userId:id},{$set:{total:result}})
         const data = await Order.find({cartid:orderid})
         await Promise.all(
             data.map(async (order) => {
@@ -1050,91 +1048,108 @@ const viewWallet = async (req,res) => {
     try{
         const user = req.session.uid;
         const details = await Wallet.find({userId:user}).sort({_id:1}).lean()
-        //console.log(details)
-    
-        const totalamount = await Wallet.aggregate([
-            {$match:{
-                userId:user,
-            } 
-            },
-            {$group:{
-                _id:null,
-                total:{$sum: "$amount"}
-                }
-            }
-        ])
-        //var total = totalamount[0].total
-        const total = totalamount.length > 0 ? totalamount[0].total : 0;
-        //console.log(totalamount)
-        res.render('user/wallet',{user:true,details,total})
+        var value = details.length > 0 ? details[0].total : 0;      
+        res.render('user/wallet',{user:true,details,value})
 
     }catch(err){
         throw new Error(err.message);
     }
 }
-
-var easyinvoice = require('easyinvoice');
-var fs = require('fs');
 const viewInvoice = async (req,res) => {
     try{
         const cartId = req.query.cid;
+        const orders = await Order.find({cartid:cartId}).lean()
+        console.log(orders)
+        const groupedOrders = new Map();
+        orders.forEach((order) => {
+            const key = `${order.userId}_${order.cartid}`;
+            if (!groupedOrders.has(key)) {
+                groupedOrders.set(key, {
+                    userId: order.userId,
+                    fname: order.fname,
+                    sname: order.sname,
+                    address: order.address,
+                    locality: order.locality,
+                    district: order.district,
+                    pincode: order.pincode,
+                    mobilenumber: order.mobilenumber,
+                    email: order.email,
+                    paymentoption: order.paymentoption,
+                    cartid: order.cartid,
+                    status: order.status,
+                    date: order.date,
+                    
+                    subtotal: order.subtotal,
+                    discount: order.discount,
+                    total: order.total,
+                    products: [],
+                });
+            }
+        
+            const groupedOrder = groupedOrders.get(key);
+            groupedOrder.products.push({
+                proId: order.proId,
+                productname: order.productname,
+                price: order.price,
+                category: order.category,
+                image: order.image,
+                quantity: order.quantity,
+                subtotalprod: order.subtotalprod,
+            });
+        });
+        const combinedOrders = Array.from(groupedOrders.values());
+        console.log(combinedOrders)
+        const invoices = Array.from(groupedOrders.values());
+        invoices.forEach((invoice) => {
+            const products = invoice.products.map(product => ({
+                "quantity": product.quantity,
+                "description": product.productname,
+                "tax-rate": 0,
+                "price": product.price,
+            }));
         var data = {
-
-            // Let's add a recipient
+            
             "client": {
-                "company": "Client Corp",
-                "address": "Clientstreet 456",
-                "zip": "4567 CD",
-                "city": "Clientcity",
-                "country": "Clientcountry"
+                "company": `${invoice.fname} ${invoice.sname}`,
+                    "address": invoice.address,
+                    "zip": invoice.pincode,
+                    "city": invoice.locality,
+                    "district": invoice.district,
+                    "country": "India"
             },
         
-            // Now let's add our own sender details
+            // sender details
             "sender": {
-                "company": "Sample Corp",
-                "address": "Sample Street 123",
+                "company": "Reflections",
+                "address": "Street 123",
                 "zip": "1234 AB",
-                "city": "Sampletown",
-                "country": "Samplecountry"
+                "city": "Bngalore",
+                "country": "India"
             },
             "images": {
                 logo: "https://public.easyinvoice.cloud/img/logo_en_original.png",
             },
             "information": {
                 // Invoice number
-                "number": "2021.0001",
-                // Invoice data
-                "date": "12-12-2021",
-                // Invoice due date
-                "due-date": "31-12-2021"
+                "number": invoice.cartid,
+                "date": invoice.date,
+                "due-date": invoice.date,
             },
-            "products": [
-                {
-                    "quantity": "2",
-                    "description": "Test1",
-                    "tax-rate": 6,
-                    "price": 33.87
-                },
-                {
-                    "quantity": "4",
-                    "description": "Test2",
-                    "tax-rate": 21,
-                    "price": 10.45
-                }
-            ],
+            "products": products,
             "bottomNotice": "Kindly pay your invoice within 15 days.",
             "settings": {
-                "currency": "USD",
+                "currency": "INR",
             },
-            "translate": {
-            },
-            "customize": {
-            },
+            "translate": {},
+            "customize": {},
         };
         easyinvoice.createInvoice(data, function (result) {
-            fs.writeFileSync("invoice.pdf", result.pdf, 'base64');
+            //fs.writeFileSync("invoice.pdf", result.pdf, 'base64');
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=invoice.pdf');
+            res.send(Buffer.from(result.pdf, 'base64'));
         });
-        res.redirect(`/editorder?oid=${cartId}&message=Invoice+dowloaded`)
+    });
     }catch(err){
         throw new Error(err.message)
     }

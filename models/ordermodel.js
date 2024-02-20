@@ -26,7 +26,9 @@ const orderSchema = new mongoose.Schema({
                 return new Date().toDateString()
             }},
         status:{type:String,
-                default:'Placed'}
+                default:'Placed'},
+        payment:{type:String,
+                default:'Failure'}
 })
 
 const Order = mongoose.model("Order",orderSchema)

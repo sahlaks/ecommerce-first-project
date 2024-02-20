@@ -307,11 +307,9 @@ const salesData = {
     
       switch (selectedPeriod) {
         case 'daily':
-         if (entry._id instanceof Date) {
-        return `Day ${entry._id.toISOString().split('T')[0]}`;
-      } else {
-        return ''; // Handle the case where _id is not a Date object
-      }
+        
+        return `Day ${entry._id}`;
+      
         case 'weekly':
           return `Week ${entry.week} - ${entry.year}`;
         case 'monthly':

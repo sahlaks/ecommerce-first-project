@@ -230,10 +230,10 @@ font-size: 1.6rem;
               </form> --}}
        
  
-            <div style="width: 100%;display: flex;margin-top: 5px;">
+            <div style="width: 100%;display: flex;margin-top: 5px;" id='{{this._id}}'>
 
                     <input type="text" disabled value="{{this.code}}" style="background-color: white;font-size: 1.6rem; margin: 0px;border-radius: 5px;box-shadow: 1px 1px 5px black;" id="couponCode">
-                  <button onclick="applyCoupon('{{this.discount}}','{{this._id}}')" style="background-color: #0B1C39; width: 100px;height: 40px;border-radius: 5px;font-size: 18px;">Apply</button>
+                  <a class="btn" onclick="applyCoupon('{{this.discount}}','{{this._id}}')" style="background-color: #0B1C39; width: 100px;height: 40px;border-radius: 5px;font-size: 18px;">Apply</a>
             </div>
                    
 
@@ -295,13 +295,21 @@ font-size: 1.6rem;
   </script> 
 
   <script>
-    function applyCoupon(discount,id){
 
- const total =parseInt( document.getElementById("total").innerHTML)
- console.log(total)
-      {{!-- const discount = parseInt(discount);
-      const discountedPrice = (total*discount)/100;
- document.getElementById("total").innerHTML = total - discountedPrice  --}}
+function applyCoupon(discount,id){
+  const total =parseInt( document.getElementById("total").innerHTML)
+
+      const dis = parseInt(discount);
+      console.log(id) 
+      const discountedPrice = (total*dis)/100; 
+    document.getElementById(id).style.display = 'none'
+ 
+  document.getElementById("total").innerHTML = total - discountedPrice ;
+  fetch(`http://localhost:3000/applyCoupon?couponId=${id}`).then((date)=>{
+
+    return date.json()
+  }).then((result)=>{
+  })
      
 
     }

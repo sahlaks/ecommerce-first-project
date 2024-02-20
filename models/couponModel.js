@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const moment = require('moment')
+
 const couponSchema = new mongoose.Schema({
 code: {
     type: String,
@@ -8,25 +10,29 @@ minAmount: {
 },
 discount:{
     type:Number,
-},
+},      
 expirationDate:{
-    type:Date,
+    type:String,
 },
 addedAt:{
-    type:Date,
-    default:Date.now()
+    type:String,
+    default:new Date().toDateString()
 },
 isUsed:{
     type:Boolean,
     default:false
 },
-users:[{
-    userId:{
-    type:String
-    }
-}]
+status:{
+    type: String,
+    default: 'active',
+},
+users:[]
 
 })
+
+couponSchema.virtual('formattedExpirationDate').get(function () {
+    return moment(this.expirationDate).format('YYYY-MM-DD');
+});
 
 const Coupon = mongoose.model("Coupon",couponSchema)
 module.exports = Coupon

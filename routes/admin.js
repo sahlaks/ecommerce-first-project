@@ -1,7 +1,7 @@
 const express = require('express');
-const { adminLogin, adLoginPost, getDashboard, getProduct, getCategory, getOrder, getUsers, logout, getCategoryPage, isBlocked, deleteOrder, editOrder, setStatus, listProduct } = require('../controllers/admin-controller');
+const { adminLogin, adLoginPost, getDashboard, getProduct, getCategory, getOrder, getUsers, logout, getCategoryPage, isBlocked, deleteOrder, editOrder, setStatus, listProduct } = require('../controllers/adminController');
 const { verifyAdmin, upload, categoryRules, categValidation, categoryValidation, productRules, proValidation, productValidation, productImgResize, productImgResizeSingle } = require('../middlewares/middlewares');
-const { addPro, addProduct, addCategory, listCategory, deleteCategory, editCat, editcategory, updateimage, deleteProduct, updatePro, editProduct, editimage, editimages, deleteImage, deleteImages } = require('../controllers/product-controller');
+const { addPro, addProduct, addCategory, listCategory, deleteCategory, editCat, editcategory, updateimage, deleteProduct, updatePro, editProduct, editimage, editimages, deleteImage, deleteImages } = require('../controllers/productController');
 const { getCoupon, createNewCoupon, postNewCoupon, editCoupon, deleteCoupon } = require('../controllers/couponController');
 const app = express.Router();
 

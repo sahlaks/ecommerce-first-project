@@ -24,6 +24,7 @@ const postNewCoupon = async (req,res) => {
     try{
     const code = generateCouponCode();
     const { minAmount, discount, expirationDate } = req.body;
+    console.log('date',req.body)
     // Save the coupon to the database
     const newCoupon = new Coupon({
       code,
@@ -54,18 +55,24 @@ const deleteCoupon = async (req,res) => {
 const getCoupons = async (req,res) => {
     try{
         const coupons = await Coupon.find({}).lean()
+        
         res.render('user/coupons',{user:true,coupons})
     }catch(err){
         throw new Error(err.message)
     }
 }
 
-const checkCoupon = async (req,res) => {
+const applyCoupon = async (req,res) => {
     try{
-        console.log('iam zayda in coupon')
-        const cId = req.query.id;
-        console.log(cId);
-        // const coupons = await Coupon.find({minAmount : {$lte: total}})
+        const cId = req.query;
+        console.log('hi',cId);
+        const coupons = await Coupon.updateOne({_id:req.query.couponId},{
+            $push:{
+                users:req.session.uid
+
+            }
+        })
+        res.json({success:true})
         // console.log(coupons)
 
     }catch(err){
@@ -77,4 +84,4 @@ module.exports = {getCoupon,
                     postNewCoupon,
                     deleteCoupon,
                     getCoupons,
-                    checkCoupon}
+                    applyCoupon}

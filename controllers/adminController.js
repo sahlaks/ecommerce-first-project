@@ -1,10 +1,10 @@
 const bcrypt = require('bcrypt')
 
-const Admin = require("../models/adminmodel")
-const Product = require("../models/productmodel")
-const User = require("../models/usermodel");
-const Category = require('../models/categorymodel');
-const Order = require('../models/ordermodel');
+const Admin = require("../models/adminModel")
+const Product = require("../models/productModel")
+const User = require("../models/userModel");
+const Category = require('../models/categoryModel');
+const Order = require('../models/orderModel');
 
 
 /*.............................................save admin data...............................................*/
@@ -100,7 +100,11 @@ const getDashboard = async (req,res) => {
               $sort: { _id: 1 }
             }
           ]);
-          console.log(data)
+          //console.log(data)
+          const formattedSalesData = data.map(item => ({
+            _id: new Date(item._id).toLocaleDateString(),
+            totalSales: item.totalSales
+          }));
           const weeklySales = await Order.aggregate([
             {
               $match: {
@@ -162,7 +166,6 @@ const getDashboard = async (req,res) => {
             }
 
           ]);
-          
           const yearlySales = await Order.aggregate([
             {
               $group: {
@@ -212,11 +215,9 @@ const getDashboard = async (req,res) => {
             $limit: 10
           }
         ]);
-        //console.log(getTopProducts)
-
         const user = await User.countDocuments()
         res.render('admin/dashboard',{data: JSON.stringify(result),sales: JSON.stringify(totalSales),revenue: JSON.stringify(totalRevenue),
-                                dailySales: JSON.stringify(data),
+                                dailySales: JSON.stringify(formattedSalesData),
                                 top10: JSON.stringify(getTopProducts),
                                 weeklySales: JSON.stringify(weeklySales),
                                 monthlySales: JSON.stringify(monthlySales),
@@ -297,9 +298,7 @@ const listProduct = async (req,res) => {
         result = false;
     }else{
         result = true;
-    }
-    
-    
+    } 
     const data = await Product.findByIdAndUpdate({_id:id},{$set: {list:result}})
     res.redirect('/admin/product')
 
@@ -476,9 +475,8 @@ const editOrder = async (req,res) => {
         throw new Error(err.message)
     }
 }
-
+                                  /*.......set status........*/
 const setStatus = async (req,res) => {  
-    console.log('setstatus function called..') 
     try{
         const status = req.query.status;
         const id = req.query.id;

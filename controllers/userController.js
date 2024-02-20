@@ -1,10 +1,10 @@
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
-const User = require("../models/usermodel");
-const Product = require('../models/productmodel');
-const Cart = require("../models/cartmodel");
-const Wishlist = require('../models/wishlistmodel');
-const Address = require('../models/addressmodel');
+const User = require("../models/userModel");
+const Product = require('../models/productModel');
+const Cart = require("../models/cartModel");
+const Wishlist = require('../models/wishlistModel');
+const Address = require('../models/addressModel');
 
 
 /*...........................................setup nodemailer..................................................*/

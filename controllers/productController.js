@@ -1,7 +1,7 @@
-const Product = require("../models/productmodel")
-const Category = require("../models/categorymodel")
-const Cart = require("../models/cartmodel")
-const Wishlist = require("../models/wishlistmodel")
+const Product = require("../models/productModel")
+const Category = require("../models/categoryModel")
+const Cart = require("../models/cartModel")
+const Wishlist = require("../models/wishlistModel")
 var showproducts;
 var countprod;
 
