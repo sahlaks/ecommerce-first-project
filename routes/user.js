@@ -68,7 +68,7 @@ app.get('/deleteWishlist/:pid',verifyLogin,deleteWishlist)
 /*...................................................checkout....................................................*/
 app.get('/checkout',verifyLogin,checkout)
 app.get('/showaddress',verifyLogin,takeAddress)
-app.post('/postcheckout',verifyLogin,addressRules,checkoutaddressValidation,checkoutForm)
+app.post('/postcheckout',verifyLogin,checkoutForm)
 app.post('/razorpay/callback',razorpayChecking);
 app.post('/razpay/callback',razorpayCheck)
 app.get('/vieworder',verifyLogin,viewOrder)

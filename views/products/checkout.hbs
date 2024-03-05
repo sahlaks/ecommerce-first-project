@@ -188,7 +188,7 @@ font-size: 1.6rem;
     const selectedPaymentOption = document.querySelector('input[name="paymentOption"]:checked');
     const form = document.querySelector('#checkoutForm');
 
-    {{!-- const requiredFields = ['fname', 'sname', 'address', 'locality', 'district', 'pincode', 'mobilenumber', 'email'];
+    const requiredFields = ['fname', 'sname', 'address', 'locality', 'district', 'pincode', 'mobilenumber', 'email'];
     for (const field of requiredFields) {
         const value = form.querySelector(`[name="${field}"]`).value.trim();
         if (value === '') {
@@ -200,7 +200,7 @@ font-size: 1.6rem;
             return;
 
         }
-    } --}}
+    }
 
     if (!selectedPaymentOption) {
        Swal.fire({
