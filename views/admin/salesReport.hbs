@@ -1,0 +1,329 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+</head>
+<body>
+    
+<style>
+        /* General styles */
+body {
+   font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex; /* Added */
+}
+
+/* Sidebar styles */
+
+/* Main content styles */
+main {
+    flex: 1;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.ul li{
+    width: 90%;
+    height: 35px;
+  
+    display: flex;
+    
+    align-items: center;
+
+    
+}
+.ul li a{
+    text-decoration: none;
+    margin-left: 20%;
+    
+}
+.sidebar{
+    width: 18%;
+    background-color: #FBD2E0;
+    margin-top: 20px;
+    margin-left:10px;
+}
+.ul li:hover{
+    background-color:white;
+}
+
+@media (max-width:890px){
+    .names{
+        display: none;
+    }
+    .heading{
+        display:none;
+    }
+}
+#report{
+    
+}
+</style>
+
+
+
+<div class="main" style="display: flex; flex-direction: row;">
+<div class="sidebar">
+    <ul class="ul">
+            <p class="heading">MENU</p>
+            <li> <a href="/admin/dashboard"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></a><a href="/admin/dashboard" class="names">Dashboard</a></li>
+            <li> <a href="/admin/product"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="20" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M58.9 42.1c3-6.1 9.6-9.6 16.3-8.7L320 64 564.8 33.4c6.7-.8 13.3 2.7 16.3 8.7l41.7 83.4c9 17.9-.6 39.6-19.8 45.1L439.6 217.3c-13.9 4-28.8-1.9-36.2-14.3L320 64 236.6 203c-7.4 12.4-22.3 18.3-36.2 14.3L37.1 170.6c-19.3-5.5-28.8-27.2-19.8-45.1L58.9 42.1zM321.1 128l54.9 91.4c14.9 24.8 44.6 36.6 72.5 28.6L576 211.6v167c0 22-15 41.2-36.4 46.6l-204.1 51c-10.2 2.6-20.9 2.6-31 0l-204.1-51C79 419.7 64 400.5 64 378.5v-167L191.6 248c27.8 8 57.6-3.8 72.5-28.6L318.9 128h2.2z"/></svg></a><a href="/admin/product" class="names">Product</a></li>
+            <li> <a href="/admin/category"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M264.5 5.2c14.9-6.9 32.1-6.9 47 0l218.6 101c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 149.8C37.4 145.8 32 137.3 32 128s5.4-17.9 13.9-21.8L264.5 5.2zM476.9 209.6l53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 277.8C37.4 273.8 32 265.3 32 256s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0l152-70.2zm-152 198.2l152-70.2 53.2 24.6c8.5 3.9 13.9 12.4 13.9 21.8s-5.4 17.9-13.9 21.8l-218.6 101c-14.9 6.9-32.1 6.9-47 0L45.9 405.8C37.4 401.8 32 393.3 32 384s5.4-17.9 13.9-21.8l53.2-24.6 152 70.2c23.4 10.8 50.4 10.8 73.8 0z"/></svg></a> <a href="/admin/category" class="names">Category</a></li>
+            <li> <a href="/admin/order"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M448 160H320V128H448v32zM48 64C21.5 64 0 85.5 0 112v64c0 26.5 21.5 48 48 48H464c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zM448 352v32H192V352H448zM48 288c-26.5 0-48 21.5-48 48v64c0 26.5 21.5 48 48 48H464c26.5 0 48-21.5 48-48V336c0-26.5-21.5-48-48-48H48z"/></svg></a> <a href="#" class="names">Orders</a></li>
+            <li> <a href="/admin/coupons"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 64C28.7 64 0 92.7 0 128v64c0 8.8 7.4 15.7 15.7 18.6C34.5 217.1 48 235 48 256s-13.5 38.9-32.3 45.4C7.4 304.3 0 311.2 0 320v64c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V320c0-8.8-7.4-15.7-15.7-18.6C541.5 294.9 528 277 528 256s13.5-38.9 32.3-45.4c8.3-2.9 15.7-9.8 15.7-18.6V128c0-35.3-28.7-64-64-64H64zm64 112l0 160c0 8.8 7.2 16 16 16H432c8.8 0 16-7.2 16-16V176c0-8.8-7.2-16-16-16H144c-8.8 0-16 7.2-16 16zM96 160c0-17.7 14.3-32 32-32H448c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V160z"/></svg></a><a href="/admin/coupons" class="names">Coupon</a></li>
+            <li> <a href="/admin/banner"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M0 80V229.5c0 17 6.7 33.3 18.7 45.3l176 176c25 25 65.5 25 90.5 0L418.7 317.3c25-25 25-65.5 0-90.5l-176-176c-12-12-28.3-18.7-45.3-18.7H48C21.5 32 0 53.5 0 80zm112 32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></a><a href="/admin/banner" class="names">Banner</a></li>
+            <li> <a href=""><svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M64 32C28.7 32 0 60.7 0 96v32H576V96c0-35.3-28.7-64-64-64H64zM576 224H0V416c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V224zM112 352h64c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16zm112 16c0-8.8 7.2-16 16-16H368c8.8 0 16 7.2 16 16s-7.2 16-16 16H240c-8.8 0-16-7.2-16-16z"/></svg></a><a href="#" class="names">Transaction</a></li>
+            <hr>
+            <P class="heading">USER MANAGEMENT</P>            
+            <li><a href=""><svg xmlns="http://www.w3.org/2000/svg" height="16" width="20" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg></a> <a href="" class="names">Manage Admin</a></li>
+            <li> <a href="/admin/customers"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="20" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z"/></svg></a><a href="/admin/customers" class="names">Customers</a></li>
+            <hr>
+            <p class="heading">OTHERS</p>
+            <li><a href=""><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg></a><a href="" class="names">Settings</a></li>
+            <li><a href=""><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></a><a href="" class="names">Help</a></li>
+            <li><a href="/admin/logout"><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"/></svg></a><a href="/admin/logout" class="names">Logout</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <h1>Sales Report</h1>
+
+        <a href="#" class="btn btn-warning" onclick="showYears()">Yearly</a>
+        <a href="#" class="btn btn-warning" onclick="showDates()">Monthly</a>
+        <a href="#" class="btn btn-warning" onclick="showDate()">Daily</a>
+        <a href="#"class="btn btn-warning" onclick="showCustomDates()">Custom</a><br><br>
+
+        <div id="dailyReport" style="display: none;">
+        <form action="/admin/getSales" method="post" >
+        <label for="expirationDate" style="">Select Date:</label>
+        <input type="date" id="selectedDate" name="selectedDate">
+        <button type="submit"  style="height:35px;background-color:#FBD2E0;border: white;" onclick="showDailyReport()">Get Sales</button> 
+        </form>
+        <button id="dailyButton" class="btn btn-warning" style="height: 30px; margin-left: 10px;">Download Report</button>
+        </div>
+
+        <div id="customReport" style="display: none;">
+            <form action="/admin/customReport" method="post">
+            <label for="customStartDate">Start Date:</label>
+            <input type="date" id="start" name="start">
+            <label for="customEndDate">End Date:</label>
+            <input type="date" id="end" name="end">
+            <button type="submit" style="height:35px;background-color:#FBD2E0;border: white;" onclick="showCustomReport()">Show Custom Report</button>
+            </form>
+            <button id="customButton" class="btn btn-warning" style="height: 30px; margin-left: 10px;">Download Report</button>
+        </div>
+
+        <div id="monthlyReport" style="display: none;">
+            <form action="/admin/getMonthlyReport" method="post" >
+            <label for="expirationDate" style="">Select Date:</label>
+            <input type="date" id="selectedDates" name="selectedDate">
+            <button type="submit"  style="height:35px;background-color:#FBD2E0;border: white;" onclick="showMonthlyReport()">Get Sales</button> 
+            </form>
+            <button id="monthlyButton" class="btn btn-warning" style="height: 30px; margin-left: 10px;">Download Report</button>
+        </div>
+
+        <div id="yearlyReport" style="display: none;">
+            <form action="/admin/getYearlyReport" method="post" >
+            <label for="expirationDate" style="">Select Year:</label><br>
+             <select id="selectedYear" name="year">
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+             </select>
+            <button type="submit"  style="margin-left: 20px; height:35px;background-color:#FBD2E0;border: white;" onclick="showYearlyReport()">Get Sales</button> 
+            </form><br>
+            <button id="downloadButton" class="btn btn-warning" style="height: 30px; margin-left: 10px;">Download Report</button>
+        </div>
+
+        <br>
+        <div id="report" style="">
+        <table class="table table-striped" class="table" id="table">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">No.</th>
+            <th scope="col">Order </th>
+            <th scope="col">Date</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Total</th>
+            <th scope="col">Payment Option</th>
+            <th scope="col">Payment</th>
+            <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+        
+         {{#each data}}
+            <tr>
+                <td>{{@index}}</td>
+                <td> <img src="/images/{{this.image}}"  alt="Product image" style="max-width: 40px;"> <span>
+                {{this.productname}} </span></td>
+                  <td> <span>{{this.date}}</span></td>
+                <td><span>{{this.fname}} </span></td>
+                <td><span>{{this.total}} </span></td>
+                <td><span>{{this.paymentoption}}</span></td>
+                <td><span>{{this.payment}}</span></td>
+                <td><span>{{this.status}}</span></td>
+            </tr>
+        
+            {{/each}}
+    </tr>
+    
+    </tbody>
+    </table>
+    </div>
+    </div>
+    </main>
+</div>
+
+<script>
+    async function getSalesDetails() {
+            const date = document.getElementById('selectedDate').value;
+            console.log(date);
+            fetch(`http://localhost:3000/admin/getSalesReport?date=${date}`)
+            .then(response => {
+             if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+             }
+              return response.json();
+              })
+                  .then(result => {
+                  console.log('Sales Data for', date, ':', result);
+                   if (result.length > 0) {
+                      displaySalesChart(result);
+                    } else {
+                      console.warn('No sales data available for the selected date.');
+        
+                    }
+              })
+        }
+</script>
+<script>
+    function showDate(){
+        var day = document.getElementById('dailyReport');
+        if(day.style.display === 'none'){
+            day.style.display = 'block';
+        }else{
+            day.style.display = 'none';
+        }
+    }
+    function showDailyReport(){
+        var day = document.getElementById('selectedDate').value;
+        if(!day){
+             alert('Please select a date.');
+            return;
+        }
+    }
+     document.getElementById('dailyButton').addEventListener('click', function () {
+        const selectedDate = document.getElementById('selectedDate').value;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/admin/dailyCsv?date=${selectedDate}&csv=true`;
+        downloadLink.download = `daily_report_${selectedDate}.csv`;
+        downloadLink.click();
+    });
+</script>
+<script>
+    function showCustomDates() {
+         var custom = document.getElementById('customReport');
+         if (custom.style.display === 'none') {
+             custom.style.display = 'block';
+        document.getElementById('start').style.display = 'inline-block';
+        document.getElementById('end').style.display = 'inline-block';
+        } else {
+            custom.style.display = 'none';
+        }
+       
+     }
+    function showCustomReport() {
+    var customStartDate = document.getElementById('start').value;
+    var customEndDate = document.getElementById('end').value;
+        if (!customStartDate || !customEndDate) {
+            alert('Please select both start and end dates.');
+            return;
+            }
+    }
+    document.getElementById('customButton').addEventListener('click', function () {
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/admin/customCsv?start=${start}&end=${end}`;
+        downloadLink.download = `monthly_report_${start}_${end}.csv`;
+        downloadLink.click();
+    });
+</script>
+<script>
+    function showDates(){
+         var day = document.getElementById('monthlyReport');
+        if(day.style.display === 'none'){
+            day.style.display = 'block';
+        }else{
+            day.style.display = 'none';
+        }
+    }
+    function showMonthlyReport(){
+         var day = document.getElementById('selectedDates').value;
+        if(!day){
+             alert('Please select a date.');
+            return;
+        }
+    }
+     document.getElementById('monthlyButton').addEventListener('click', function () {
+        const selectedMonth = document.getElementById('selectedDates').value;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/admin/monthlyCsv?month=${selectedMonth}&csv=true`;
+        downloadLink.download = `monthly_report_${selectedMonth}.csv`;
+        downloadLink.click();
+    });
+
+</script>
+<script>
+    function showYears(){
+        var day = document.getElementById('yearlyReport');
+        if(day.style.display === 'none'){
+            day.style.display = 'block';
+        }else{
+            day.style.display = 'none';
+        }
+    }
+    function showYearlyReport(){
+         var day = document.getElementById('selectedYear').value;
+        if(!day){
+             alert('Please select a date.');
+            return;
+        }
+    }
+     document.getElementById('downloadButton').addEventListener('click', function () {
+        const selectedYear = document.getElementById('selectedYear').value;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/admin/yearlyReport?year=${selectedYear}&csv=true`;
+        downloadLink.download = `yearly_report_${selectedYear}.csv`;
+        downloadLink.click();
+    });
+</script>
+</body>
+</html>
+

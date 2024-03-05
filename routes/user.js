@@ -1,8 +1,8 @@
 const express = require('express');
 const { signupGetController, createUser, userLogin, userIn, homeRoute, checkOtp, forgotPass, verifyMail, failOtp, sendOtp, getOtp, reSendOtp, resetPwd, reSet, contactController, aboutController, signout, profile, address, editProfile, addAddress, addaddress, deleteAddress, changepwd, editAddress, updateAddress, changepassword } = require('../controllers/userController');
-const { validationRules, checkValidation, verifyLogin, pwdValidation, resetPwdRules, changepwdRules, changepwdValidation, addressValidation, addressRules } = require('../middlewares/middlewares');
+const { validationRules, checkValidation, verifyLogin, pwdValidation, resetPwdRules, changepwdRules, changepwdValidation, addressValidation, addressRules, editaddressValidation, checkoutaddressValidation } = require('../middlewares/middlewares');
 const { products, productDetails} = require('../controllers/productController');
-const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder, razorpayChecking, returnOrder, viewWallet, viewInvoice} = require('../controllers/cartController');
+const { addCart, wishlist, cart, wishlistView, deleteWishlist, deleteCart, checkout, updateCart, takeAddress, orderSuccess, checkoutForm, viewOrder, viewOrderList, cancelOrder, razorpayChecking, returnOrder, viewWallet, viewInvoice, razorpayCheck} = require('../controllers/cartController');
 const { getCoupons, checkCoupon, applyCoupon } = require('../controllers/couponController');
 const app = express.Router();
 
@@ -53,14 +53,14 @@ app.get('/productdetails/:id',verifyLogin,productDetails)
 
 
 /*.........................................Cart, Wishlist............................................................*/
-app.get('/addcart/:pid',verifyLogin,addCart)
+app.post('/addcart/:pid',verifyLogin,addCart)
 app.get('/cart',verifyLogin,cart)
 app.get('/deleteCart/:productId',verifyLogin,deleteCart)  
 app.get('/cartChangeQuantity',verifyLogin,updateCart)
 
 
 
-app.get('/wishlist/:pid',verifyLogin,wishlist)
+app.post('/wishlist/:pid',verifyLogin,wishlist)
 app.get('/wishlistview',verifyLogin,wishlistView)
 app.get('/deleteWishlist/:pid',verifyLogin,deleteWishlist)
 
@@ -68,8 +68,9 @@ app.get('/deleteWishlist/:pid',verifyLogin,deleteWishlist)
 /*...................................................checkout....................................................*/
 app.get('/checkout',verifyLogin,checkout)
 app.get('/showaddress',verifyLogin,takeAddress)
-app.post('/postcheckout',verifyLogin,checkoutForm)
+app.post('/postcheckout',verifyLogin,addressRules,checkoutaddressValidation,checkoutForm)
 app.post('/razorpay/callback',razorpayChecking);
+app.post('/razpay/callback',razorpayCheck)
 app.get('/vieworder',verifyLogin,viewOrder)
 app.get('/editorder',verifyLogin,viewOrderList)
 app.get('/cancelorder',verifyLogin,cancelOrder)
@@ -91,7 +92,7 @@ app.get('/address',verifyLogin,address)
 app.get('/addaddress',verifyLogin,addaddress)
 app.post('/addaddress',verifyLogin,addressRules,addressValidation,addAddress)
 app.get('/editaddress',verifyLogin,editAddress)
-app.post('/editaddress/:id',verifyLogin,updateAddress)
+app.post('/editaddress/:id',verifyLogin,addressRules,editaddressValidation,updateAddress)
 app.get('/deleteaddress/:id',verifyLogin,deleteAddress)
 
 

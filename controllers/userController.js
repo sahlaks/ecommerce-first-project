@@ -5,14 +5,15 @@ const Product = require('../models/productModel');
 const Cart = require("../models/cartModel");
 const Wishlist = require('../models/wishlistModel');
 const Address = require('../models/addressModel');
+const Banner = require('../models/bannerModel')
 
 
 /*...........................................setup nodemailer..................................................*/
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-           user: 'sahlaanasks@gmail.com',		
-           pass: 'tbqo rpny amgh pxhs'				
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,			
        }
    });
 
@@ -23,9 +24,8 @@ const userLogin = (req,res) => {
     res.render('user/login')
 }
 
-const userIn = async (req,res) => {
-
-    //console.log(req.body)
+const userIn = async (req,res,next) => {
+    try{
     const user = await User.findOne({ email: req.body.email });
         if (user) {
           bcrypt.compare(req.body.password, user.password, (err,result)=>{
@@ -46,27 +46,25 @@ const userIn = async (req,res) => {
         } else {
           res.render('user/login',{Error: 'We cannot find an account!'});
         }
+    }catch(error){
+        console.error(error)
+        const err = new Error();
+        err.statusCode = 404
+        next(err);
+    }
 }
 
-
-
-
-
-
 /*...............................................home page.....................................................................*/
-const homeRoute = async (req,res) => {
+const homeRoute = async (req,res,next) => {
     try{
-
     const userId = req.session.uid;
-    //console.log(userId)
     const products = await Product.find().limit(6).lean()
     const newarrival = await Product.find().sort({_id:-1}).limit(3).lean()
     const user = await Cart.findOne({userId:userId})
     const user1 = await Wishlist.findOne({userId:userId})
-    //console.log(user)
+    const banner = await Banner.findOne({}).lean()
     if(user){
         var cart = user.products.length;
-        //console.log(pr)
         if(!cart){
             cart = 0;
         }
@@ -76,13 +74,15 @@ const homeRoute = async (req,res) => {
     }
     req.session.cartCount = cart;
     req.session.listCount = list;
-    //console.log(req.session.count)
     var count=req.session.cartCount;
     var list=req.session.listCount;
-    res.render('user/home',{user:true,products,newarrival,cart,list})
+    res.render('user/home',{user:true,products,newarrival,cart,list,banner})
 
     }catch(error){
-        throw new Error(error.message)
+        console.error(error)
+        const err = new Error();
+        err.statusCode = 404
+        next(err);
     }
 }
 
@@ -94,7 +94,8 @@ const signupGetController = (req, res) => {
 
 //.....post method.........................
 
-const createUser = async (req,res) => {
+const createUser = async (req,res,next) => {
+try{
 const hashPassword = await bcrypt.hash(req.body.password,10)
 req.body.password = hashPassword;
 const email = await User.findOne({email:req.body.email})
@@ -109,11 +110,13 @@ if(email){
         res.redirect('sendOtp')
 
 }
+}catch(error){
+    console.error(error)
+    const err = new Error();
+    err.statusCode = 404
+    next(err);
 }
-
-
-
-
+}
 
 /*.................................................send and resend otp...........................................................................*/
 const sendOtp = (req,res) => {
@@ -152,7 +155,7 @@ const getOtp = (req,res) => {
     res.render('user/otpsend')
 }
 
-const checkOtp = async (req,res) => {
+const checkOtp = async (req,res,next) => {
 try{
     if(req.session.otp == req.body.otp){
         if(req.session.forgotpwd == true){
@@ -170,11 +173,12 @@ try{
         else{
             res.render('user/otpfail')
         }
-}catch(err){
-    throw new Error(err.message)
-    //res.status(500).send('Internal Server Error');
+}catch(error){
+    console.error(error);
+    const err = new Error();
+    err.statusCode = 500;
+    next(err);
 }
-
 }
 
 
@@ -183,15 +187,18 @@ const resetPwd = (req,res) =>{
     res.render('user/resetpwd')
 }
 
-const reSet = async (req,res) => {
+const reSet = async (req,res,next) => {
     try{
     const hashPassword = await bcrypt.hash(req.body.password,10)
     req.body.password = hashPassword;
     const val = await User.updateOne({email:req.session.email},{$set: {password:req.body.password}})
     
     res.redirect('home')
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
 
@@ -206,7 +213,8 @@ const forgotPass = (req,res) => {
     res.render('user/forgotpwd')
 }
 
-const verifyMail =async (req,res) => {
+const verifyMail =async (req,res,next) => {
+    try{
     const user = await User.findOne({ email: req.body.email });
     if (user) {
         if(user.isblocked){
@@ -220,6 +228,12 @@ const verifyMail =async (req,res) => {
         else{
             res.render('user/forgotpwd',{Error:'Has your email address changed? Email not found'})
         }
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 500;
+        next(err);
+    }
 }
 
 /*...................................................contact controller................................................................*/
@@ -232,124 +246,153 @@ const aboutController = async(req,res) => {
 }
 
 /*..................................................Profile......................................................*/
-const profile = async (req,res) =>{
+const profile = async (req,res,next) =>{
     try{
         const userId = req.session.uid;
         const user1 = await User.findOne({_id:userId}).lean()
+
+        if (!user1) {
+            const err = new Error();
+            err.statusCode = 404;
+            next(err);
+            return;
+        }
         res.render('user/profile',{user:true,user1})
     }
-    catch(err){
-        throw new Error(err.message)
+    catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 500;
+        next(err);
     }
 }
                                     /*....edit profile.....*/
-const editProfile = async (req,res) => {
+const editProfile = async (req,res,next) => {
     const userId = req.session.uid;
-    //console.log(req.body)
     try{
         const data = await User.findByIdAndUpdate({_id:userId},
                                                     {$set: {username:req.body.username,
                                                             email:req.body.email,
                                                             mobilenumber:req.body.mobilenumber}})
+        if (!data) {
+            const err = new Error('User not found');
+            err.statusCode = 404;
+            next(err);
+            return;
+        }
+
         res.redirect('/profile')
 
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error)
+        const err = new Error('Internal server error');
+        err.statusCode = 500;
+        next(err);
     }
 
 }
 
 
 /*......................................................address..........................................................*/
-const address = async (req,res) => {
+const address = async (req,res,next) => {
     try{
         const userId = req.session.uid;
         const Error = req.query.error
         const address = await Address.findOne({userId : userId}).lean()
-        console.log()
         res.render('user/address',{user:true,address,Error})
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error)
+        const err = new Error('Internal server error');
+        err.statusCode = 500;
+        next(err);
     }
 }
                                     /*.......show address........*/
-const addaddress = async (req,res) => {
+const addaddress = async (req,res,next) => {
     const userId = req.session.uid;
     try{
     const user1 = await User.findOne({_id : userId}).lean()
-    //console.log(user1)
     res.render('user/addaddress',{user:true,user1})
-    }catch(err){
-        throw new Error(err.message)
-    }
+    }catch(error){
+    console.error(error)
+    const err = new Error('Internal server error');
+    err.statusCode = 500;
+    next(err);
+}
 }
                                     /*.......add address........*/
-const addAddress = async (req,res) => {
+const addAddress = async (req, res, next) => {
     const userId = req.session.uid;
     const body = req.body;
-    //console.log(req.body)
-
-    try{
-
-        const user1 = await Address.findOne({userId}).lean()
-        if(user1){
-            const addr = await Address.find({type : body.type})
-            if(addr){
-                res.redirect('/address?error=Address+already+exists')
-            }else{
-            user1.addresses.push(body)
-            await user1.save()
+    try {
+        const existingAddress = await Address.findOne({
+                                userId,
+                                addresses: { $elemMatch: { type: body.type } }
+                                });
+                                    
+        if (existingAddress) {
+            return res.redirect('/address?error=Address+already+exists');
             }
-        }
-        else{
-        
-            const data = {
+                                                                  
+        const user1 = await Address.findOne({ userId });
+        if (user1) {
+            user1.addresses.push(body);
+            await user1.save();
+            } else {
+                const data = {
                 userId,
-                addresses:[body]
-            }
-            const address = await Address.create(data)
-
-            res.redirect('/address')
+                addresses: [body]
+                };
+                await Address.create(data);
+                }
+        res.redirect('/address');
+    } catch (error) {
+        console.error(error)
+        const err = new Error('Internal server error');
+        err.statusCode = 500;
+        next(err);
         }
-
-    }catch(err){
-        throw new Error(err.message)
     }
-}
+
                                 /*........edit address........*/
-const editAddress = async (req,res) => {
+const editAddress = async (req,res,next) => {
     const userId = req.session.uid;
     const Id = req.query.id;
     const type = req.query.type
     req.session.type = type;
-    //console.log(type)
-    //console.log(Id)
+   
     try{
         const user = await Address.findOne({userId}).lean()
         if(user){
         const data = user.addresses.find(p => p._id == Id)
-        //console.log('first')
-        //console.log(data)
+        if(!data){
+            const err = new Error('Address not found');
+            err.statusCode = 404;
+            next(err);
+            return;
+        }
         req.session.address = data
         res.render('user/editaddress',{user:true,data,type})
+        }else{
+            const err = new Error('User not found');
+            err.statusCode = 404;
+            next(err);
+            return;
         }
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 500;
+        next(err);
     }
 }
                                     /*....update address....*/
-const updateAddress = async (req,res) => {
-   //console.log('inside post updte')
-    //console.log(req.params.id)
-    //console.log(req.session.type)
-    //console.log(req.body)
+const updateAddress = async (req,res,next) => {
     try{
         const userId = req.session.uid;
         const type = req.session.type;
         const user = await Address.findOne({userId}).lean()
-        //console.log(user)
         if(user){
-        // //const data = user.addresses.find(p => p._id == Id)
         const data = await Address.findOneAndUpdate({userId,'addresses.type':type},
                                         {$set: {
                                         'addresses.$.fname': req.body.fname,
@@ -365,17 +408,18 @@ const updateAddress = async (req,res) => {
                                         'addresses.$.mobilenumber': req.body.mobilenumber,
                                         'addresses.$.type': type,
                                         }})
-        //console.log('update')
-        //console.log(data)
         }
         res.redirect('/address')
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
     
 }
                                     /*......delete address......*/
-const deleteAddress = async (req,res) =>{
+const deleteAddress = async (req,res,next) =>{
     const userId = req.session.uid;
     const Id = req.params.id;
     
@@ -391,8 +435,11 @@ const deleteAddress = async (req,res) =>{
             const user1 = await Address.deleteOne({userId})
       }
       res.redirect('/address')
-    } catch (err) {
-      throw new Error(err.message)
+    } catch (error) {
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
   }
 
@@ -403,21 +450,24 @@ const changepwd = async (req,res) => {
     res.render('user/changepwd',{user:true, Message})
 }
 
-const changepassword = async (req,res) => {
+const changepassword = async (req,res,next) => {
     try{
     const checkPassword = await bcrypt.hash(req.body.currentpassword,10)
     const user = await User.findOne({email:req.session.email})
-    if(user.password == checkPassword){
+    const passwordMatch = await bcrypt.compare(req.body.currentpassword, user.password);
+    if(passwordMatch){
         const hashPassword = await bcrypt.hash(req.body.newpassword,10)
-        req.body.newpassword = hashPassword;
-        const val = await User.updateOne({email:req.session.email},{$set: {password:req.body.newpassword}})
+        const val = await User.updateOne({email:req.session.email},{$set: {password:hashPassword}})
     
         res.redirect('/changepwd?error=You+have+successfully+changed+the+password!')
     }else{
         res.redirect('/changepwd?error=You+have+entered+wrong+password!')
     }
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
 

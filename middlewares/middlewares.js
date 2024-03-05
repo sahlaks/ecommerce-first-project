@@ -12,7 +12,14 @@ const validationRules=[
     check('mobilenumber').not().isEmpty().withMessage("Mobile number is required").isLength({min:10,max:10}).withMessage('Mobile number must be 10 digits').isNumeric().withMessage("Invalid mobile number"),
 
     check('email').isEmail().withMessage('Invalid email'),
-    check('password').not().isEmpty().withMessage("Password required").isLength({min:6}).withMessage("Password must be minumum 6 characters").
+    check('password').not().isEmpty().withMessage("Password required")
+    .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1
+    })
+    .withMessage("Password must be 8 characters and contain at least one uppercase letter, one lowercase letter, and one number").
     custom(
         (value) => {
         // Check if the password contains at least one special character
@@ -63,7 +70,15 @@ const verifyAdmin = (req,res,next) => {
 
 /*.................reset password.........................*/
 const resetPwdRules = [
-    check('password').not().isEmpty().withMessage("Password required").isLength({min:6}).withMessage("Password must be minumum 6 characters").
+    check('password').not().isEmpty().withMessage("Password required").
+    isLength({min:8}).withMessage("Password must be minumum 8 characters").
+    isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1
+    })
+    .withMessage("Password must be 8 characters and contain at least one uppercase letter, one lowercase letter, and one number").
     custom(
         (value) => {
         // Check if the password contains at least one special character
@@ -87,7 +102,7 @@ const pwdValidation = (req,res,next)=>{
     let error= validationResult(req)
     console.log(error.mapped())
     if(!error.isEmpty()){
-        res.render("user/resetpwd",{err:error.mapped()})
+        res.render("user/resetpwd",{err:error.mapped(),data:req.body})
     }
     else{
         next()
@@ -96,7 +111,13 @@ const pwdValidation = (req,res,next)=>{
 
 /*.............................change password...........................................*/
 const changepwdRules = [
-    check('newpassword').not().isEmpty().withMessage("Password required").isLength({min:6}).withMessage("Password must be minumum 6 characters").
+    check('newpassword').not().isEmpty().withMessage("Password required")
+    .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1
+    }).
     custom(
         (value) => {
         // Check if the password contains at least one special character
@@ -239,10 +260,12 @@ const productValidation = (req,res,next)=>{
 /*...........................................address validation.................................................*/
 const addressRules = [
     check('fname')
-    .not().isEmpty().withMessage('First name should not be empty'),
+    .not().isEmpty().withMessage('First name should not be empty')
+    .isString().withMessage("First name should only consists of characters"),
     
     check('sname')
-    .not().isEmpty().withMessage('Second name should not be empty'),
+    .not().isEmpty().withMessage('Second name should not be empty')
+    .isString().withMessage("Second name should only consists of characters"),
     
     check('pincode')
     .not().isEmpty().withMessage('Pincode should not be empty')
@@ -256,10 +279,12 @@ const addressRules = [
     .not().isEmpty().withMessage('Address should not be empty'),
 
     check('district')
-    .not().isEmpty().withMessage('District should not be empty'),
+    .not().isEmpty().withMessage('District should not be empty')
+    .isString().withMessage("Invalid value"),
 
     check('state')
-    .not().isEmpty().withMessage('State should not be empty'),
+    .not().isEmpty().withMessage('State should not be empty')
+    .isString().withMessage("Invalid value"),
 
     check('email')
     .not().isEmpty().withMessage('Email should not be empty')
@@ -277,6 +302,28 @@ const addressValidation = (req,res,next)=>{
     console.log(error.mapped())
     if(!error.isEmpty()){
         res.render("user/addaddress",{err:error.mapped(),body:req.body})
+    }
+    else{
+        next()
+    }
+}
+
+const editaddressValidation = (req,res,next) =>{
+    let error = validationResult(req)
+    console.log(error.mapped())
+    if(!error.isEmpty()){
+        res.render("user/editaddress",{err:error.mapped(),user:true,body:req.body,data: req.session.address, type: req.session.type})
+    }
+    else{
+        next()
+    }
+}
+
+const checkoutaddressValidation = (req,res,next) =>{
+    let error = validationResult(req)
+    console.log(error.mapped())
+    if(!error.isEmpty()){
+        res.render("products/checkout",{err:error.mapped(),user:true,addr:req.body})
     }
     else{
         next()
@@ -359,5 +406,7 @@ module.exports = {validationRules,
                 addressRules,
                 addressValidation,
                 productImgResize,
-                productImgResizeSingle
+                productImgResizeSingle,
+                editaddressValidation,
+                checkoutaddressValidation
                 }

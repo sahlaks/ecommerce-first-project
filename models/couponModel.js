@@ -30,9 +30,6 @@ users:[]
 
 })
 
-couponSchema.virtual('formattedExpirationDate').get(function () {
-    return moment(this.expirationDate).format('YYYY-MM-DD');
-});
 
 const Coupon = mongoose.model("Coupon",couponSchema)
 module.exports = Coupon

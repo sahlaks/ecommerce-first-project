@@ -1,8 +1,10 @@
 const express = require('express');
-const { adminLogin, adLoginPost, getDashboard, getProduct, getCategory, getOrder, getUsers, logout, getCategoryPage, isBlocked, deleteOrder, editOrder, setStatus, listProduct } = require('../controllers/adminController');
+const { adminLogin, adLoginPost, getDashboard, getProduct, getCategory, getOrder, getUsers, logout, getCategoryPage, isBlocked, deleteOrder, editOrder, setStatus, listProduct, getDailySales } = require('../controllers/adminController');
 const { verifyAdmin, upload, categoryRules, categValidation, categoryValidation, productRules, proValidation, productValidation, productImgResize, productImgResizeSingle } = require('../middlewares/middlewares');
 const { addPro, addProduct, addCategory, listCategory, deleteCategory, editCat, editcategory, updateimage, deleteProduct, updatePro, editProduct, editimage, editimages, deleteImage, deleteImages } = require('../controllers/productController');
 const { getCoupon, createNewCoupon, postNewCoupon, editCoupon, deleteCoupon } = require('../controllers/couponController');
+const { getBanner, addBanner, deleteBanner } = require('../controllers/bannerController');
+const { salesReport, getSalesReport, getSales, report, customReport, monthlyReport, yearlyReport, yearlyCsv, monthlyCsv, dailyCsv, customCsv } = require('../controllers/salesReportController');
 const app = express.Router();
 
 
@@ -13,6 +15,17 @@ app.post('/',adLoginPost)
 
 /*............................................dashboard........................................................*/
 app.get('/dashboard',verifyAdmin,getDashboard)
+app.get('/salesreport',verifyAdmin,salesReport)
+app.get('/getSalesreport',getSalesReport)
+app.post('/getSales',getSales)
+app.post('/customReport',customReport)
+app.post('/getMonthlyReport',monthlyReport)
+app.post('/getYearlyReport',yearlyReport)
+app.get('/yearlyReport',yearlyCsv)
+app.get('/monthlyCsv',monthlyCsv)
+app.get('/dailyCsv',dailyCsv)
+app.get('/customCsv',customCsv)
+
 
 
 /*..........................................only products.........................................*/
@@ -55,9 +68,15 @@ app.get('/deletecoupon',verifyAdmin,deleteCoupon)
 app.get('/customers',verifyAdmin,getUsers)
 app.get('/isblocked/:id',verifyAdmin,isBlocked)
 
-
+/*.............................................banner..................................................................*/
+app.get('/banner',verifyAdmin,getBanner)
+app.post('/addBanner',verifyAdmin,upload.array('images',4),addBanner)
+app.get('/deleteBanner',verifyAdmin,deleteBanner)
 
 /*..............................................logout.....................................................*/
 app.get('/logout',verifyAdmin,logout)
+app.get('/getSalesDetails', getDailySales)
+
+  
 
 module.exports = app

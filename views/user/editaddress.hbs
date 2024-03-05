@@ -88,6 +88,9 @@ h1 {
 .size{
   font-size: 1.6rem;
 }
+.text-danger{
+  font-size: 1.6rem;
+}
 </style>
 
 
@@ -127,10 +130,12 @@ h1 {
     <div class="form-group col-md-6">
       <label for="" class="size">First name</label><br>
       <input type="text" class="form-control form-control-lg" id="" value="{{data.fname}}" name="fname" >
+      {{#if err.fname.path}} <span class="text-danger">{{err.fname.msg}}</span> {{/if}}
     </div>
     <div class="form-group col-md-6">
       <label for="" class="size">Second name</label><br>
       <input type="text" class="form-control form-control-lg" id="" value="{{data.sname}}" name="sname">
+      {{#if err.sname.path}} <span class="text-danger">{{err.sname.msg}}</span> {{/if}}
     </div>
   </div>
   <br>
@@ -138,26 +143,31 @@ h1 {
     <div class="form-group col-md-6">
       <label for="" class="size">Pincode</label><br>
       <input type="number" class="form-control form-control-lg" id="" value="{{data.pincode}}" name="pincode">
+      {{#if err.pincode.path}} <span class="text-danger">{{err.pincode.msg}}</span> {{/if}}
     </div>
     <div class="form-group col-md-6">
       <label for="" class="size">Locality</label><br>
       <input type="text" class="form-control form-control-lg" id="inputText" value="{{data.locality}}" name="locality">
+      {{#if err.locality.path}} <span class="text-danger">{{err.locality.msg}}</span> {{/if}}
     </div>
   </div>
   <br>
   <div class="form-group">
     <label for="" class="size">Address</label><br>
     <textarea class="form-control size form-control-lg" id="exampleFormControlTextarea1" rows="3"   name="address">{{data.address}}</textarea> 
+    {{#if err.address.path}} <span class="text-danger">{{err.address.msg}}</span> {{/if}}
   </div>
   <br>
   <div class="form-row">
     <div class="form-group col-md-6">
       <label for="" class="size">District</label><br>
       <input type="text" class="form-control form-control-lg" id="" value="{{data.district}}" name="district">
+      {{#if err.district.path}} <span class="text-danger">{{err.district.msg}}</span> {{/if}}
     </div>
     <div class="form-group col-md-6">
       <label for="" class="size">State</label><br>
       <input type="text" class="form-control form-control-lg" id="" value="{{data.state}}" name="state">
+      {{#if err.state.path}} <span class="text-danger">{{err.state.msg}}</span> {{/if}}
     </div>
   </div>
   <br>
@@ -165,6 +175,7 @@ h1 {
     <div class="form-group col-md-6">
       <label for="" class="size">Landmark</label><br>
       <input type="text" class="form-control form-control-lg" id="inputEmail4" name="landmark" value="{{data.landmark}}" >
+      {{#if err.landmark.path}} <span class="text-danger">{{err.landmark.msg}}</span> {{/if}}
     </div>
     <div class="form-group col-md-6">
       <label for="" class="size">Alternate number</label><br>
@@ -176,10 +187,12 @@ h1 {
     <div class="form-group col-md-6">
       <label for="" class="size">Email</label><br>
       <input type="email" class="form-control form-control-lg" id="" name="email" value="{{data.email}}">
+      {{#if err.email.path}} <span class="text-danger">{{err.email.msg}}</span> {{/if}}
     </div>
     <div class="form-group col-md-6">
       <label for="" class="size">mobilenumber</label><br>
       <input type="Number" class="form-control form-control-lg" id="" value="{{data.mobilenumber}}" name="mobilenumber">
+      {{#if err.mobilenumber.path}} <span class="text-danger">{{err.mobilenumber.msg}}</span> {{/if}}
     </div>
   </div>
   

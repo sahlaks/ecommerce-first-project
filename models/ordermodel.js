@@ -28,7 +28,9 @@ const orderSchema = new mongoose.Schema({
         status:{type:String,
                 default:'Placed'},
         payment:{type:String,
-                default:'Failure'}
+                default:'Failure'},
+        appliedCoupons:{type:Array,
+                default: []}
 })
 
 const Order = mongoose.model("Order",orderSchema)

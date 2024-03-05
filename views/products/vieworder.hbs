@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
      <style>
@@ -107,6 +107,9 @@ h1 {
 }
         .heading p{
             line-height: 10px;
+        }
+        .order-container-address p{
+            
         }
 .information-container{
     display: flex;
@@ -251,25 +254,25 @@ h1 {
          <div class="information-container">
          <div class="order-container-address">
              <h3><strong>Billing Information</strong></h2>
-            <p><strong> <span>{{fname}} {{sname}} </span></strong></p>
-            <p><span>{{address}},{{locality}},{{district}},{{pincode}} </span> </p>
-            <p> <span>mob: {{mobilenumber}} </span></p>
+            <p style="line-height: 10px;"><strong> <span>{{fname}} {{sname}} </span></strong></p>
+            <p style="line-height: 15px;"><span>{{address}},{{locality}}, {{district}},{{pincode}} </span> </p>
+            <p style="line-height: 0.5px;"> <span>mob: {{mobilenumber}} </span></p>
          </div>
 
          <div class="order-container-address">
              <h3><strong>Shipping Information</strong></h3>
-            <p><strong> <span>Payment Type </span></strong></p>
-            <p><span>{{paymentoption}} </span> </p>
+            <p><strong> <span>Payment Type: </span></strong></p>
+            <p style="line-height: 1px;" id="option"><span>{{paymentoption}} </span> </p>
          </div>
 
          <div class="order-container-address">
-            <h3><strong >Order Status :<span id="orderStatus" style="color: {{getStatusColor this.status}}"> <span id="status">{{status}}</span></span></strong>
+            <h3><strong >Order Status: <span id="orderStatus" style="color: {{getStatusColor this.status}}"> <span id="status">{{status}}</span></span></strong>
             </h3>
         </div>
             
            <div class="order-container-address" style="display: flex;">
             <span id="changeStatus"></span>
-            <a href="/invoice?cid={{cartid}}" class="btn" style="height: 30px;width:100%;margin-left: 10px;">Invoice Download</a>
+            <a href="/invoice?cid={{cartid}}" id="invoice" class="btn" style="height: 30px;width:100%;margin-left: 10px;">Invoice Download</a>
             </div>
         </div>
 
@@ -328,6 +331,12 @@ h1 {
                 <td><span>Discount:</span></td>
                 <td><span>{{discount}}</span></td>
             </tr>
+            {{#each appliedCoupons}}
+                <tr>
+                    <td><span>Coupon Disount:</span></td>
+                    <td><span>{{this.discount}} off</span></td>
+                 </tr>
+            {{/each}}
             <tr>
                 <td> <strong><span>Total:</span></strong></td>
                 <td><strong> <span>{{total}}</span> </strong></td>
@@ -339,20 +348,52 @@ h1 {
         </div>
         </div>
        {{/each}}
-        
+       
+    <div class="col-lg-12">
+    <div class="confirmation_tittle">
+    <form action="/razpay/callback?orderid={{orderId}}" method="POST" style="font-size: 1.6rem;" id="payment">
+    <input type="hidden" name="razorpay_order_id" value="{{ razorpayOrder.id }}">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"
+          data-key="{{ keyId }}"
+          data-amount="{{ razorpayOrder.amount }}"
+          data-currency="INR"
+          data-order_id="{{ razorpayOrder.id }}"
+          data-buttontext="Pay with Razorpay"
+          data-name="{{formData.fname}}"
+          data-description="Purchase Description"
+          data-image="your_logo_url"
+          data-prefill.name="{{ fname }}"
+          data-prefill.email="{{ email }}"
+          data-theme.color="#F37254">
+    </script>
+</form>
+</div>
+</div>
+
+ 
+
     </main>
 </div>
 <script>
 let status =document.getElementById("status").innerHTML
 let cartid =document.getElementById("cartid").innerHTML
+let payment = document.getElementById("option").innerHTML
 //console.log(cartid)
 if(status=='Delivered'){
     document.getElementById("changeStatus").innerHTML = ` <a href="/returnorder?oid=${cartid}" class="btn" style="background-color: green;color: white;">Return</a>`
+    document.getElementById('payment').style.display = 'none';
 }
 if(status=='Placed'||status=='Shipped'){
     document.getElementById("changeStatus").innerHTML = ` <a href="/cancelorder?oid=${cartid}" class="btn" style="background-color: green;color: white;">Cancel</a>`
+    document.getElementById('payment').style.display = 'none';
+    //document.getElementById('invoice').style.display = 'none';
 }
-
+if(status == 'Pending' || status == 'Cancelled'){
+    document.getElementById('invoice').style.display = 'none';
+}
+if((status=='Placed'||status=='Shipped') && (payment=='Razorpay')){
+     document.getElementById('invoice').style.display = 'block';
+}
 </script>
 </body>
 </html>

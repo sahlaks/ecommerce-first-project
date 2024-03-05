@@ -1,6 +1,12 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- Add these links in the <head> section of your HTML file -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
+<body>
+
 <style>
-
-
     * {
 	margin: 0;
 	padding: 0;
@@ -162,16 +168,16 @@ body {
 						<h3>{{this.product.productname}}</h3>
 						<h4>Price: {{this.product.price}}</h4>
 
-						
         				<div class="container" style="display: flex;"> 
 						<p style="color: black;" class="unit" >Quantity: </p>
 						<a href="/cartChangeQuantity?id={{this.product._id}}&&count=-1" class="btn" >-</a>
 						<input style="width: 50px; text-align:center; font-size:2rem;" name="" class="" id="{{this.product._id}}" value="{{quantity}}" >
 						<a href="/cartChangeQuantity?id={{this.product._id}}&&count=1" class="btn" >+</a> </div>
-						<p class="btn-area"><a aria-hidden="true" class="fa fa-trash" href="/deleteCart/{{this.product._id}}" onclick="return confirm('Are you sure want to delete')">Remove</a></p>
+						<p class="btn-area"><a aria-hidden="true" class="fa fa-trash" href="/deleteCart/{{this.product._id}}" onclick="confirmDelete('{{this.product._id}}', event)">Remove</a></p>
 					</div>
 				</div>
 				{{/each}}
+						{{#if Error}} <h3 style="font-size: 1.7rem;text-align: center;color: red;"><strong> {{Error}}</strong> </h3> {{/if}}
 				
 			</div>
 			
@@ -188,30 +194,32 @@ body {
 		</div>
 	</div>
 
+<script>
+   function confirmDelete(itemId, event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'You won\'t be able to revert this!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+             await fetch(`/deleteCart/${itemId}`);
+            Swal.fire('Deleted!', 'Your product has been deleted from cart.', 'success');
+            window.location.href = '/cart';
+        } else {
+            Swal.fire('Cancelled', 'Your product is safe!', 'info');
+        }
+    });
 
+    }
+</script>
+<script>
+	 
 
-{{!-- <script>
-
-
-function increment(id,count) {
-	var quantity = document.getElementById(id).value;
-	if(quantity==1&&count==-1){
-
-	}
-	else{
-
-	console.log(id,count,quantity)
-	
-   document.getElementById(id).value=parseInt(quantity)+parseInt(count)
-	}
-
-	
-
-
-}
-
-
-</script> --}}
-
+</script>
 
 </body>

@@ -10,22 +10,23 @@ function generateCouponCode() {
   }
 
 
-const getCoupon = async (req,res) => {
+const getCoupon = async (req,res,next) => {
     try{
         const coupons = await Coupon.find({}).lean()
         res.render('admin/coupon',{coupons})
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
 
 
-const postNewCoupon = async (req,res) => {
+const postNewCoupon = async (req,res,next) => {
     try{
     const code = generateCouponCode();
     const { minAmount, discount, expirationDate } = req.body;
-    console.log('date',req.body)
-    // Save the coupon to the database
     const newCoupon = new Coupon({
       code,
       minAmount,
@@ -35,48 +36,62 @@ const postNewCoupon = async (req,res) => {
   
     await newCoupon.save();
     res.redirect('/admin/coupons'); 
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error('Internal server error');
+        err.statusCode = 500;
+        next(err);
     }
 }
 
 
-const deleteCoupon = async (req,res) => {
+const deleteCoupon = async (req,res,next) => {
     try{
         const couponId = req.query.id;
         const data = await Coupon.findByIdAndDelete({_id:couponId})
+        if(!data){
+            const err = new Error('Coupon not found');
+            err.statusCode = 404;
+            throw err;
+        }
         res.redirect('/admin/coupons')
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 500;
+        next(err);
     }
 }
 
 
-const getCoupons = async (req,res) => {
+const getCoupons = async (req,res,next) => {
     try{
         const coupons = await Coupon.find({}).lean()
-        
         res.render('user/coupons',{user:true,coupons})
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error('Failed to fetch coupons');
+        err.statusCode = 404;
+        next(err);
     }
 }
 
-const applyCoupon = async (req,res) => {
+
+const applyCoupon = async (req,res,next) => {
     try{
         const cId = req.query;
-        console.log('hi',cId);
         const coupons = await Coupon.updateOne({_id:req.query.couponId},{
             $push:{
                 users:req.session.uid
-
             }
         })
         res.json({success:true})
-        // console.log(coupons)
 
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error()
+        err.statusCode = 500
+        next(err)
     }
 }
 

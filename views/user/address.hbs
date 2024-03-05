@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 <body>
      <style>
@@ -141,7 +141,7 @@ h1 {
                   {{this.fname}} {{this.sname}} , {{this.address}} , {{this.district}} , {{this.state}} - {{this.pincode}} , {{this.mobilenumber}}</td>
                 <!--<td><a href="/editaddress/{{this._id}}" style="color: blue; font-size:1.6rem;font-weight: bold; margin-left:20px">Edit</a></td>-->
                <td><a href="/editaddress?id={{this._id}}&&type={{this.type}}" style="color:blue; font-size:1.6rem;font-weight: bold; margin-left:20px">Edit</a>
-                <a href="/deleteaddress/{{this._id}}" style="color:red; font-size:1.6rem;font-weight: bold; margin-left:20px" onclick="return confirm('Are you sure want to delete')">Delete</a></td>
+                <a href="/deleteaddress/{{this._id}}" style="color:red; font-size:1.6rem;font-weight: bold; margin-left:20px" onclick="confirmDelete('{{this._id}}', event)">Delete</a></td>
             </tr>
         
           {{/each}}
@@ -153,5 +153,30 @@ h1 {
         </div>
     </main>
 </div>
+
+
+<script>
+   function confirmDelete(itemId, event) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'You won\'t be able to revert this!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+             await fetch(`/deleteaddress/${itemId}`);
+            Swal.fire('Deleted!', 'Your address has been deleted.', 'success');
+            window.location.href = '/address';
+        } else {
+            Swal.fire('Cancelled', 'Your address is safe!', 'info');
+        }
+    });
+
+    }
+</script>
 </body>
 </html>

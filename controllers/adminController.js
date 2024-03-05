@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt')
-
 const Admin = require("../models/adminModel")
 const Product = require("../models/productModel")
 const User = require("../models/userModel");
@@ -31,9 +30,10 @@ async function saveUser(email, password) {
 /*...........................................admin login...................................................*/
 const adminLogin = (req,res) => {
     res.render('admin/adlogin')
-}
-
-const adLoginPost = async (req,res) => {
+} 
+ 
+const adLoginPost = async (req,res,next) => {
+  try{
     const admin = await Admin.findOne({ email: req.body.email });
     if (admin) {
       bcrypt.compare(req.body.password, admin.password, (err,result)=>{
@@ -48,11 +48,17 @@ const adLoginPost = async (req,res) => {
       } else {
         res.render('admin/adlogin',{Error: 'We cannot find an account!'});
       }
+    }catch(error){
+      console.error(error);
+      const err = new Error();
+      err.statusCode = 404;
+      next(err);
+    }
 }
 
 
 /*..................................................dashboard access...................................................*/
-const getDashboard = async (req,res) => {
+const getDashboard = async (req,res,next) => {
     try{
         const category = await Category.find().lean()
         const categories = JSON.stringify(category)
@@ -105,6 +111,7 @@ const getDashboard = async (req,res) => {
             _id: new Date(item._id).toLocaleDateString(),
             totalSales: item.totalSales
           }));
+          //console.log(formattedSalesData)
           const weeklySales = await Order.aggregate([
             {
               $match: {
@@ -184,6 +191,12 @@ const getDashboard = async (req,res) => {
 
           const totalSales = await Order.aggregate([
             {
+              $match:{
+                status: {$ne: 'Cancelled'},
+                status: {$ne: 'Returned' }
+              }
+            },
+            {
               $group: {
                 _id: null,
                 totalSales: { $sum: '$quantity' }
@@ -192,7 +205,12 @@ const getDashboard = async (req,res) => {
           ]);
 
         const totalRevenue = await Order.aggregate([
-            {
+          { $match: {
+            payment: 'Success', 
+            status: { $ne: 'Cancelled' } 
+          }
+          },  
+          {
               $group: {
                 _id: null,
                 totalRevenue: { $sum: '$total' }
@@ -216,24 +234,66 @@ const getDashboard = async (req,res) => {
           }
         ]);
         const user = await User.countDocuments()
-        res.render('admin/dashboard',{data: JSON.stringify(result),sales: JSON.stringify(totalSales),revenue: JSON.stringify(totalRevenue),
+        res.render('admin/dashboard',{data: JSON.stringify(result),
+                                sales: JSON.stringify(totalSales),
+                                revenue: JSON.stringify(totalRevenue),
                                 dailySales: JSON.stringify(formattedSalesData),
                                 top10: JSON.stringify(getTopProducts),
                                 weeklySales: JSON.stringify(weeklySales),
                                 monthlySales: JSON.stringify(monthlySales),
                                 yearlySales: JSON.stringify(yearlySales),
-                                count:JSON.stringify(user)})
-    }catch(err){ 
-        throw new Error(err.message)
+                                count:JSON.stringify(user),
+                                result,})
+    }catch(error){ 
+      console.error(error);
+      const err = new Error('Internal server error');
+      err.statusCode = 500;
+      next(err);
     }
+}
+
+const getDailySales = async (req,res,next) => {
+  try {
+    const date = req.query.date;
+    const selectedDate = new Date(date);
+
+    const nextDate = new Date(date);
+    nextDate.setDate(selectedDate.getDate() + 1);
+    const data = await Order.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: selectedDate,
+            $lt: nextDate,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$date',
+          totalSales: { $sum: '$total' },
+        },
+      },
+    ]);
+
+    const formattedSalesData = data.map(item => ({
+      _id: new Date(item._id).toLocaleDateString(),
+      totalSales: item.totalSales
+    }));
+    res.json(formattedSalesData)
+  }catch(error){
+    console.error(error);
+    const err = new Error('Internal server error');
+    err.statusCode = 500;
+    next(err);
+  }
 }
 
 
 
 /*.................................................product page...........................................*/
-const getProduct = async (req,res) => {
+const getProduct = async (req,res,next) => {
     try{
-
         var search = '';
         if(req.query.search){
                 search = req.query.search;
@@ -242,7 +302,6 @@ const getProduct = async (req,res) => {
         if(req.query.page){
                 page = req.query.page;
         }
-
         const limit = 6;
         const products = await Product.find({
             list:true,
@@ -273,22 +332,22 @@ const getProduct = async (req,res) => {
                         isCurrent: j == currentPage,
                         });
 }
-     
-    //const products = await Product.find({list:true}).lean();
     const unlist = await Product.find({list:false}).lean();
 
-   // console.log(products)
     res.render('admin/product',{products,unlist,
                                                 totalPages,
                                                 currentPage,
                                                 pages,})
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+      console.error(error);
+      const err = new Error();
+      err.statusCode = 500;
+      next(err);
     }
 }
 
                                     /*.........list or unlist........*/
-const listProduct = async (req,res) => {
+const listProduct = async (req,res,next) => {
     try{
 
     const id = req.params.id;
@@ -302,25 +361,52 @@ const listProduct = async (req,res) => {
     const data = await Product.findByIdAndUpdate({_id:id},{$set: {list:result}})
     res.redirect('/admin/product')
 
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
 
 
 /*...............................................category page..............................................*/
-const getCategoryPage = async (req,res) => {
+const getCategoryPage = async (req,res,next) => {
     try{
-        const category = await Category.find().sort({_id:-1}).lean()
-        res.render('admin/category',{category})
+      var page = 1;
+      if(req.query.page){
+              page = req.query.page;
+      }
+      const limit = 6;
+        const category = await Category.find()
+                        .limit( limit * 1 )
+                        .skip( (page - 1) * limit )
+                        .sort({_id:-1})
+                        .lean()
+        const count = await Category.find().countDocuments();
+        const totalPages = Math.ceil(count/limit);
+        const currentPage = page;
 
-    }catch(err){
-        throw new Error(err.message)
+        const pages = [];
+        for (let j = 1; j <= totalPages; j++) {
+            pages.push({
+                        pageNumber: j,
+                        isCurrent: j == currentPage,
+                        });
+                      }
+
+        res.render('admin/category',{category,totalPages,currentPage,pages})
+
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
 
 /*................................................order page.................................................*/
-const getOrder = async (req,res) => {
+const getOrder = async (req,res,next) => {
     try{
 
       var search = '';
@@ -331,7 +417,7 @@ const getOrder = async (req,res) => {
       if(req.query.page){
               page = req.query.page;
       }
-      const limit = 6;
+      const limit = 30;
 
         const orders = await Order.find({
           $or:[
@@ -384,6 +470,7 @@ const getOrder = async (req,res) => {
                 subtotal: order.subtotal,
                 discount: order.discount,
                 total: order.total,
+                appliedCoupons: order.appliedCoupons,
                 products: [],
             });
         }
@@ -400,14 +487,17 @@ const getOrder = async (req,res) => {
     });
     const combinedOrders = Array.from(groupedOrders.values());
         res.render('admin/order',{combinedOrders,totalPages,currentPage,pages})
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+      console.error(error);
+      const err =  new Error('Internal server error');
+      err.statusCode = 500;
+      next(err);
     }
 }
 
 
 /*...............................................delete order....................................................*/
-const deleteOrder = async (req,res) => {
+const deleteOrder = async (req,res,next) => {
     const orderId = req.params.oid;
     try{
         const deleteOrder = await Order.deleteOne({cartid:orderId})
@@ -418,13 +508,16 @@ const deleteOrder = async (req,res) => {
         else{
             res.render("admin/order",{Error: 'Order not found!'})
         }
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+      console.error(error);
+      const err = new Error('Internal server error');
+      err.statusCode = 500;
+      next(err);
     }
 }
 
 /*..................................................edit order..........................................................*/
-const editOrder = async (req,res) => {
+const editOrder = async (req,res,next) => {
     const orderId = req.params.oid;
     try{
         const orders = await Order.find({cartid:orderId}).lean()
@@ -452,6 +545,7 @@ const editOrder = async (req,res) => {
                 subtotal: order.subtotal,
                 discount: order.discount,
                 total: order.total,
+                appliedCoupons: order.appliedCoupons,
                 products: [],
             });
         }
@@ -471,35 +565,64 @@ const editOrder = async (req,res) => {
 
         res.render('admin/editorder',{combinedOrders,orderId})
 
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err =  new Error();
+        err.statusCode = 404;
+        next(err);
     }
 }
                                   /*.......set status........*/
-const setStatus = async (req,res) => {  
+const setStatus = async (req,res,next) => {  
     try{
         const status = req.query.status;
         const id = req.query.id;
         
         const order = await Order.updateMany({cartid:id},{$set:{status:status}})
         res.redirect('/admin/order')
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+      console.error(error);
+      const err = new Error();
+      err.statusCode = 404;
+      next(err);
     }
 }
 
 /*.....................................................user control.........................................................*/
-const getUsers = async (req,res) => {
+const getUsers = async (req,res,next) => {
     try{
-        const users = await User.find().lean()
-        res.render('admin/customers',{users})
+      var page = 1;
 
-    }catch(err){
-        throw new Error(err.message)
+      if(req.query.page){
+          page = req.query.page;
+      }
+      const limit = 6;
+
+        const users = await User.find()
+                      .limit(limit * 1)
+                      .skip( (page - 1) * limit)
+                      .lean()
+        const count = await User.find().countDocuments();
+        const totalPages = Math.ceil(count/limit);
+        const currentPage = page;
+        const pages = [];
+        for (let j = 1; j <= totalPages; j++) {
+            pages.push({
+                        pageNumber: j,
+                        isCurrent: j == currentPage,
+                        });
+                      }           
+        res.render('admin/customers',{users,totalPages,currentPage,pages})
+
+    }catch(error){
+      console.error(error);
+      const err = new Error();
+      err.statusCode = 500;
+      next(err);
     }
 }
 
-const isBlocked = async (req,res) => {
+const isBlocked = async (req,res,next) => {
     try{
     const userId = req.params.id
     const datas = await User.findOne({_id:userId})
@@ -512,8 +635,11 @@ const isBlocked = async (req,res) => {
 
     const data = await User.findByIdAndUpdate({_id:userId},{$set: {isblocked:value}})
     res.redirect('/admin/customers')
-    }catch(err){
-        throw new Error(err.message)
+    }catch(error){
+        console.error(error);
+        const err = new Error();
+        err.statusCode = 500;
+        next(err);
     }
 
 }
@@ -528,6 +654,7 @@ const logout = (req,res) =>{
 module.exports = {adminLogin,
                 adLoginPost,
                 getDashboard,
+                getDailySales,
                 getProduct,
                 listProduct,
                 getCategoryPage,

@@ -1,3 +1,7 @@
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
  <style>
 .form-control{
   font-size: 1.6rem;
@@ -12,6 +16,9 @@ font-size: 1.6rem;
 .dropdown-item{
   width: auto;
   font-size: 1.5rem;
+}
+.text-danger{
+  font-size: 1.6rem;
 }
  </style>
  <body>
@@ -38,124 +45,50 @@ font-size: 1.6rem;
                    <div class="col-md-6 form-group p_star">
                       <label for="" class="size">First name</label><br>
                       <input type="text" class="form-control form-control-lg" id="" value="{{addr.fname}}" name="fname" />
+                      {{#if err.fname.path}} <span class="text-danger">{{err.fname.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-6 form-group p_star">
                       <label for="" class="size">Second name</label><br>
                       <input type="text" class="form-control form-control-lg" id="" value="{{addr.sname}}" name="sname" />
+                      {{#if err.sname.path}} <span class="text-danger">{{err.sname.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-12 form-group p_star">
                       <label for="" class="size">Address line</label><br>
                       <input type="text" class="form-control form-control-lg" id="add2" value="{{addr.address}}" name="address" />
-                      
+                      {{#if err.address.path}} <span class="text-danger">{{err.address.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-12 form-group p_star">
                       <label for="" class="size">Locality</label><br>
                       <input type="text" class="form-control form-control-lg" id="city" value="{{addr.locality}}" name="locality" />
-                     
+                      {{#if err.locality.path}} <span class="text-danger">{{err.locality.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-12 form-group p_star">
                       <label for="" class="size">District</label><br>
                       <input type="text" class="form-control form-control-lg" id="" value="{{addr.district}}" name="district" />
-                     
+                     {{#if err.district.path}} <span class="text-danger">{{err.district.msg}}</span> {{/if}}
                     </div>
                    
                     <div class="col-md-12 form-group">
                       <label for="" class="size">Pincode</label><br>
                       <input type="text" class="form-control form-control-lg" id="zip" value="{{addr.pincode}}" name="pincode" placeholder="Postcode/ZIP" />
+                      {{#if err.pincode.path}} <span class="text-danger">{{err.pincode.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-6 form-group p_star">
                       <label for="" class="size">Mobile number</label><br>
                       <input type="text" class="form-control form-control-lg" id="number" value="{{addr.mobilenumber}}" name="mobilenumber" />
-                      
+                      {{#if err.mobilenumber.path}} <span class="text-danger">{{err.mobilenumber.msg}}</span> {{/if}}
                     </div>
                     <div class="col-md-6 form-group p_star">
                       <label for="" class="size">Email</label><br>
                       <input type="text" class="form-control form-control-lg" id="email" value="{{addr.email}}" name="email" />
-                     
+                     {{#if err.email.path}} <span class="text-danger">{{err.email.msg}}</span> {{/if}}
                     </div>
-                    
-                    {{!-- <div class="col-md-12 form-group p_star" id="dropdown">
-                      <label for="" class="size">Select address</label><br>
-                      <select id="">
-                        
-                        <option value="home">Home</option>
-                        <option value="work">Work</option>
-                      </select>
-                    </div> --}}
-                    
-                  
-                    {{!-- <div class="col-md-12 form-group">
-                      
-                       <label> <input type="checkbox" id="showaddressform" name="selector" />
-                        Add a new address?</label>
-  <div class="order_box" id="addressForm">
-  <form action="" method="post">
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="" placeholder="First name*" name="fname" >
-    </div>
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="" placeholder="Second name*" name="sname">
-    </div>
-  </div>
-  <br>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <input type="number" class="form-control form-control-lg" id="" placeholder="Pincode*" name="pincode">
-    </div>
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="inputText" placeholder="Locality*" name="locality">
-    </div>
-  </div>
-  <br>
-  <div class="form-group">
-    <textarea class="form-control size form-control-lg" id="exampleFormControlTextarea1" rows="3"  placeholder="Address (Area and Street)*" name="address"></textarea> 
-  </div>
-  <br>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="" placeholder="City/District/Town*" name="district">
-    </div>
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="" placeholder="State*" name="state">
-    </div>
-  </div>
-  <br>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <input type="text" class="form-control form-control-lg" id="inputEmail4" placeholder="Landmark(Optional)" name="landmark">
-    </div>
-    <div class="form-group col-md-6">
-      <input type="Number" class="form-control form-control-lg" id="inputNumber" placeholder="Alternate Phone(Optional)" name="phone">
-    </div>
-  </div>
-  <br>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <input type="email" class="form-control form-control-lg" id="" name="email" placeholder="email">
-    </div>
-    <div class="form-group col-md-6">
-      <input type="Number" class="form-control form-control-lg" id="" placeholder="10-digit mobile number*" name="mobilenumber">
-    </div>
-  </div>
-  
-  <div class="form-check form-check-inline">
-  <input class="form-check-input" type="radio" name="type" id="inlineRadio1" value="home">
-  <label class="form-check-label" for="inlineRadio1">Home</label>
-</div>
-<div class="form-check form-check-inline">
-  <input class="form-check-input" type="radio" name="type" id="inlineRadio2" value="work">
-  <label class="form-check-label" for="inlineRadio2">Work</label>
-</div>
-<a class="btn_3" href="#" onclick="saveAndHideForm()">Save</a>
-</form>
-  </div>                    
-  </div> --}}
+             
                     <div class="col-md-12 form-group"> 
                       <div class="order_box">
                       {{!-- <div class="creat_account"> --}}
                         <h3>Payment Options</h3>
-                        {{#if error}} <span class="text-danger" style="font-size: 1.6rem;">{{error}}</span> {{/if}}
+                        {{#if error}} <span class="text-danger">{{error}}</span> {{/if}}
                         <hr>
                       <div style="display: flex; justify-content:space-around; font-size:1.6rem">
                       <label for="cashondelivery"><input type="radio" id="cashondelivery" name="paymentOption" value="COD" /> Cash On Delivery</label>
@@ -167,7 +100,8 @@ font-size: 1.6rem;
                         </div>
                       </div>
                       <div style="display: flex; justify-content: center; margin-top: 20px;">
-                       <button class="btn_3" type="button" onclick="submitOrder()">Place Order</button>
+                     <input type="hidden" name="appliedCoupons" id="appliedCoupons">
+                      <button class="btn_3" type="button" onclick="submitOrder()">Place Order</button>
                     </div>
                       </div>
                   
@@ -220,30 +154,12 @@ font-size: 1.6rem;
                 </h2>
               </div>
               {{#each coupons}}
-              {{!-- <form action="/checkcoupon?id={{this._id}}" class="form-inline" method="post">
-                <div class="form-row">
-                <div class="form-group ">
-              <input style="font-size:1.6rem; margin-left:0px;" type="text" value="{{this.code}}"/>
-              <button>Apply Coupon</button>
-                </div>
-                </div>
-              </form> --}}
-       
- 
+              
             <div style="width: 100%;display: flex;margin-top: 5px;" id='{{this._id}}'>
 
-                    <input type="text" disabled value="{{this.code}}" style="background-color: white;font-size: 1.6rem; margin: 0px;border-radius: 5px;box-shadow: 1px 1px 5px black;" id="couponCode">
-                  <a class="btn" onclick="applyCoupon('{{this.discount}}','{{this._id}}')" style="background-color: #0B1C39; width: 100px;height: 40px;border-radius: 5px;font-size: 18px;">Apply</a>
+                  <input type="text" disabled value="{{this.code}}" style="background-color: white;font-size: 1.6rem; margin: 0px;border-radius: 5px;box-shadow: 1px 1px 5px black;" id="couponCode">
+                  <a class="btn" onclick="applyCoupon('{{this.discount}}','{{this._id}}')" style=" border-radius: 5px;margin-left: 10px;padding: 20px 28px;">Apply</a>
             </div>
-                   
-
-
-              
-  
-     
- 
-
-
               {{/each}}
             </div> 
                     </ul>
@@ -272,21 +188,31 @@ font-size: 1.6rem;
     const selectedPaymentOption = document.querySelector('input[name="paymentOption"]:checked');
     const form = document.querySelector('#checkoutForm');
 
-    const requiredFields = ['fname', 'sname', 'address', 'locality', 'district', 'pincode', 'mobilenumber', 'email'];
+    {{!-- const requiredFields = ['fname', 'sname', 'address', 'locality', 'district', 'pincode', 'mobilenumber', 'email'];
     for (const field of requiredFields) {
         const value = form.querySelector(`[name="${field}"]`).value.trim();
         if (value === '') {
-            alert(`Please fill in the form fields`);
+           Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please fill in all the form fields',
+            });
             return;
-        }
-    }
 
-    
+        }
+    } --}}
 
     if (!selectedPaymentOption) {
-      alert('Please select a payment option');
-      return;
+       Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please select a payment option',
+        });
+        return;
     }
+
+    document.getElementById("appliedCoupons").value = JSON.stringify(getAppliedCoupons());
+    
     console.log('Form submitted successfully!');
 
     form.submit();
@@ -295,7 +221,7 @@ font-size: 1.6rem;
   </script> 
 
   <script>
-
+let appliedCoupons = [];
 function applyCoupon(discount,id){
   const total =parseInt( document.getElementById("total").innerHTML)
 
@@ -303,8 +229,13 @@ function applyCoupon(discount,id){
       console.log(id) 
       const discountedPrice = (total*dis)/100; 
     document.getElementById(id).style.display = 'none'
- 
-  document.getElementById("total").innerHTML = total - discountedPrice ;
+    document.getElementById("total").innerHTML = total - discountedPrice ;
+    {{!-- document.getElementById('discount').value = discountedPrice;
+    document.getElementById('cid').value = id; --}}
+    appliedCoupons.push({
+    id: id,
+    discount: discountedPrice
+  });
   fetch(`http://localhost:3000/applyCoupon?couponId=${id}`).then((date)=>{
 
     return date.json()
@@ -313,5 +244,9 @@ function applyCoupon(discount,id){
      
 
     }
-  </script>  
+
+  function getAppliedCoupons() {
+    return appliedCoupons;
+}
+  </script> 
  </body>

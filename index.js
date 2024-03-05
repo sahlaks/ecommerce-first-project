@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express')
 const app = express();
 const Connection = require('./config');
@@ -9,8 +10,7 @@ const noche = require('nocache')
 const multer = require('multer')
 const path = require('path')
 const Razorpay = require('razorpay')
-require('dotenv').config();
-
+const port = process.env.PORT || 3000
 
 /*.......razorpay.........*/
 const raz = new Razorpay({
@@ -50,18 +50,45 @@ app.engine('hbs',hbs({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+
                                 return 'purple';
                               case 'Cancelled':
                                 return 'red';
+                              case 'Pending':
+                                return 'orange';
                               default:
                                 return 'gray';
                             }
                             },
                             eq: function (a, b, options) {
                               if (a == b) { return options.fn(this); }
-                            }
                             },
+                            getPaymentColor: function (status) {
+                              switch (status) {
+                                case 'Failure':
+                                  return 'red';
+                                case 'Success':
+                                  return 'green';
+                                case 'Pending':
+                                  return 'orange';
+
+                            }
+                          },
+                        }
                             }))
 
 Connection();
 app.use('/',userRouter)
 app.use('/admin',adminRouter)
 
-app.listen(3000,console.log("server created"))
+app.all('*',(req,res)=>{
+  res.render('error/404')
+})
+
+app.use((err, req, res, next) => {
+  if(err.statusCode  == 500){
+    res.render('error/500')
+  }
+  if(err.statusCode  == 404){
+    res.render('error/404')
+  }
+
+});
+
+app.listen(port,console.log("server created"))
